@@ -1,0 +1,130 @@
+---
+layout: default
+title: Home
+---
+
+<!-- Hero Section -->
+<section class="hero hero--photo" style="background-image: url('{{ '/assets/images/louisville_flood_1937.jpg' | relative_url }}');">
+  <div class="hero-overlay" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero-content hero-content--centered">
+      <h1 class="hero-title hero-title--light">In Our Economy&nbsp;…</h1>
+      <p class="hero-dynamic hero-dynamic--light">
+        <span id="typewriter"></span>
+      </p>
+      <p class="hero-description hero-description--light">
+        {{ site.description }}
+      </p>
+    </div>
+  </div>
+  <p class="hero-attribution">Louisville, Kentucky, 1937 &mdash; Margaret Bourke-White / <em>LIFE</em></p>
+</section>
+
+<!-- Scale of Wealth Section -->
+<section class="scale-section">
+  <div class="container">
+    <div class="scale-layout">
+      <div class="scale-text">
+        <h2 class="scale-heading">A billion is not just a big million</h2>
+        <p>When politicians and journalists talk about billionaires, the numbers can feel abstract — just very large figures in a news story. But the difference between a million dollars and a billion dollars is not a matter of degree. It is a matter of kind.</p>
+        <p>If you spent $1,000 every single day, it would take you nearly three years to spend a million dollars. To spend a billion at the same rate, you would need almost <em>three thousand years</em>. The Roman Empire rose and fell in less time than it would take to exhaust a billion dollars at a thousand dollars a day.</p>
+        <p>This gap matters because wealth at that scale confers a qualitatively different kind of power — over investment decisions, over political speech, over the shape of public life. Understanding the scale is the first step toward thinking clearly about it.</p>
+      </div>
+      <div class="scale-viz">
+        <div class="scale-viz-card">
+          <iframe
+            id="billion-iframe"
+            src="{{ '/assets/html/how-much-is-1-billion.html' | relative_url }}"
+            scrolling="no"
+            title="Where is 1 million on a number line from 0 to 1 billion?">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Posts Section -->
+<section class="recent-posts">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Latest Writing</h2>
+      <a href="{{ '/blog/' | relative_url }}" class="section-link">All posts →</a>
+    </div>
+
+    <div class="posts-grid">
+      {% assign recent_posts = site.posts | limit: 10 %}
+      {% for post in recent_posts %}
+      <article class="post-card {% if forloop.first %}post-card--featured{% endif %}">
+        <div class="post-card-inner">
+          {% if post.categories.size > 0 %}
+          <div class="post-card-category">
+            {% for cat in post.categories limit:1 %}
+            <span class="category-badge">{{ cat }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <h3 class="post-card-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+          </h3>
+          {% if post.subtitle %}
+          <p class="post-card-subtitle">{{ post.subtitle }}</p>
+          {% endif %}
+          <p class="post-card-excerpt">{{ post.excerpt | strip_html | truncatewords: 30 }}</p>
+          <div class="post-card-meta">
+            <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+            <span class="reading-time">{{ post.content | number_of_words | divided_by: 200 | plus: 1 }} min read</span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    {% if site.posts.size > 10 %}
+    <div class="section-footer">
+      <a href="{{ '/blog/' | relative_url }}" class="btn btn-outline">View all {{ site.posts.size }} posts</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Topics Section -->
+<section class="topics-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Topics</h2>
+    </div>
+    <div class="topics-grid">
+      {% assign all_categories = site.posts | map: "categories" | join: "," | split: "," | uniq | sort %}
+      {% for category in all_categories %}
+      {% if category != "" %}
+      <a href="{{ '/blog/' | relative_url }}" class="topic-card">
+        <span class="topic-name">{{ category }}</span>
+        {% assign count = site.posts | where_exp: "post", "post.categories contains category" | size %}
+        <span class="topic-count">{{ count }} post{% if count != 1 %}s{% endif %}</span>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+// Typewriter data injected from Jekyll
+// Auto-resize the billion iframe when its content grows
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.iframeHeight) {
+    var iframe = document.getElementById('billion-iframe');
+    if (iframe) iframe.style.height = (e.data.iframeHeight + 16) + 'px';
+  }
+});
+
+window.typewriterPhrases = [
+  "we are not billionaires",
+  "making ends meet is challenging",
+  "having kids is too expensive",
+  "debt is a burden",
+  "debt is a huge burden",
+  "we can't afford it",
+];
+</script>

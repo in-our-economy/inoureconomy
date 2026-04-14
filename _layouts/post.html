@@ -1,0 +1,83 @@
+---
+layout: default
+---
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="post-hero">
+    <div class="container">
+      <div class="post-meta-top">
+        {% if page.categories.size > 0 %}
+        <div class="post-categories">
+          {% for category in page.categories %}
+          <a href="{{ '/blog/' | relative_url }}?category={{ category | slugify }}" class="category-badge">{{ category }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <h1 class="post-title" itemprop="name headline">{{ page.title }}</h1>
+      {% if page.subtitle %}
+      <p class="post-subtitle">{{ page.subtitle }}</p>
+      {% endif %}
+      <div class="post-byline">
+        <span class="post-author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <span itemprop="name">{{ page.author | default: site.author.name }}</span>
+        </span>
+        <span class="divider">·</span>
+        <time class="post-date" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+          {{ page.date | date: "%B %-d, %Y" }}
+        </time>
+        <span class="divider">·</span>
+        <span class="post-reading-time">{{ page.content | number_of_words | divided_by: 200 | plus: 1 }} min read</span>
+      </div>
+    </div>
+  </div>
+
+  {% if page.image %}
+  <div class="post-featured-image">
+    <div class="container">
+      <img src="{{ page.image | relative_url }}" alt="{{ page.image_alt | default: page.title }}" itemprop="image">
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="container">
+    <div class="post-layout">
+      <div class="post-content" itemprop="articleBody">
+        {{ content }}
+      </div>
+
+      <aside class="post-sidebar">
+        <div class="sidebar-sticky">
+          <div class="toc-widget">
+            <h3>Contents</h3>
+            <div id="toc"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="post-footer">
+      {% if page.tags.size > 0 %}
+      <div class="post-tags">
+        {% for tag in page.tags %}
+        <span class="tag">#{{ tag }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="post-nav">
+        {% if page.previous.url %}
+        <a href="{{ page.previous.url | relative_url }}" class="post-nav-link prev">
+          <span class="nav-label">← Previous</span>
+          <span class="nav-title">{{ page.previous.title }}</span>
+        </a>
+        {% endif %}
+        {% if page.next.url %}
+        <a href="{{ page.next.url | relative_url }}" class="post-nav-link next">
+          <span class="nav-label">Next →</span>
+          <span class="nav-title">{{ page.next.title }}</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</article>

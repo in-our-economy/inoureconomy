@@ -1,0 +1,108 @@
+---
+layout: default
+title: Data & Visualizations
+subtitle: Charts, datasets, and interactive figures
+permalink: /data/
+---
+
+<div class="page-hero">
+  <div class="container">
+    <h1 class="page-title">Data &amp; Visualizations</h1>
+    <p class="page-subtitle">Charts, datasets, and interactive figures</p>
+  </div>
+</div>
+
+<section class="data-section">
+  <div class="container">
+
+    <!-- Chart 1: Income Inequality Over Time -->
+    <div class="chart-block">
+      <div class="chart-header">
+        <div>
+          <h2 class="chart-title">Income Share of the Top 1%</h2>
+          <p class="chart-description">
+            Pre-tax national income share held by the top 1% in the United States, 1913–2019.
+            Data from the World Inequality Database.
+          </p>
+        </div>
+        <div class="chart-controls">
+          <button class="chart-btn active" data-chart="ineq" data-type="line">Line</button>
+          <button class="chart-btn" data-chart="ineq" data-type="bar">Bar</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="inequalityChart"></canvas>
+      </div>
+      <p class="chart-source">Source: World Inequality Database (wid.world)</p>
+    </div>
+
+    <!-- Chart 2: Wage Growth by Percentile -->
+    <div class="chart-block">
+      <div class="chart-header">
+        <div>
+          <h2 class="chart-title">Wage Growth by Income Percentile</h2>
+          <p class="chart-description">
+            Cumulative percent change in real annual wages, 1979–2022, by wage percentile.
+            Lower-wage workers have seen lower cumulative wage growth over this period.
+          </p>
+        </div>
+      </div>
+      <div class="chart-container chart-container--bar">
+        <canvas id="wageChart"></canvas>
+      </div>
+      <p class="chart-source">Source: Economic Policy Institute analysis of Current Population Survey data</p>
+    </div>
+
+    <!-- Chart 3: Composition Doughnut -->
+    <div class="chart-row">
+      <div class="chart-block chart-block--half">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Federal Budget Composition</h2>
+            <p class="chart-description">Share of federal outlays by major category, FY 2023.</p>
+          </div>
+        </div>
+        <div class="chart-container chart-container--sm">
+          <canvas id="budgetChart"></canvas>
+        </div>
+        <p class="chart-source">Source: Congressional Budget Office</p>
+      </div>
+
+      <div class="chart-block chart-block--half">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Unemployment Rate by Education</h2>
+            <p class="chart-description">Annual unemployment rate by educational attainment, 2023.</p>
+          </div>
+        </div>
+        <div class="chart-container chart-container--sm">
+          <canvas id="educChart"></canvas>
+        </div>
+        <p class="chart-source">Source: Bureau of Labor Statistics</p>
+      </div>
+    </div>
+
+    <!-- Chart 4: Scatter -->
+    <div class="chart-block">
+      <div class="chart-header">
+        <div>
+          <h2 class="chart-title">Housing Cost Burden vs. Median Income</h2>
+          <p class="chart-description">
+            Relationship between median household income and the share of renters
+            who are cost-burdened (spending more than 30% of income on housing)
+            across U.S. metropolitan areas.
+          </p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="housingChart"></canvas>
+      </div>
+      <p class="chart-source">Source: American Community Survey 5-year estimates</p>
+    </div>
+
+  </div>
+</section>
+
+<script>
+window.dataPageCharts = true;
+</script>

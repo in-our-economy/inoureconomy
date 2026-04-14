@@ -1,0 +1,57 @@
+title: In Our Economy
+tagline: "We can't afford it"
+description: >-
+  Insights about the economy of the 99%
+baseurl: ""
+url: ""
+
+author:
+  name: Your Name
+  email: you@example.com
+  bio: >-
+    Economist and writer exploring how policy shapes people's lives.
+  twitter: yourhandle
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: /blog/:year/:month/:day/:title/
+
+# Pagination
+paginate: 10
+paginate_path: "/blog/page:num/"
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-paginate
+
+# Sass settings
+sass:
+  quiet_deps: true
+  silence_deprecations: ["import"]
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - README.md
+
+# Navigation
+nav_links:
+  - title: Home
+    url: /
+  - title: Blog
+    url: /blog/
+  - title: Data
+    url: /data/
+  - title: About
+    url: /about/
+
+# Social
+social:
+  twitter: "https://twitter.com/yourhandle"
+  github: "https://github.com/yourusername"
+  email: "mailto:you@example.com"

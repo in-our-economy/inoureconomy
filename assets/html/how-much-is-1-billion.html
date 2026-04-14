@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How much is $1 billion?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: transparent;
+      color: #1a1d2e;
+      padding: 2rem 1.75rem 1.5rem;
+    }
+
+    #instruction {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      color: #1a1d2e;
+    }
+
+    #nl-svg {
+      width: 100%;
+      cursor: crosshair;
+      display: block;
+    }
+
+    #banner {
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: #f6f7fb;
+      border: 1px solid #e5e7ef;
+      border-radius: 10px;
+      display: none;
+    }
+
+    #banner-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      margin: 0 0 5px;
+    }
+
+    #banner-body {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1a1d2e;
+      margin: 0 0 3px;
+    }
+
+    #banner-sub {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    #banner-miss {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin: 6px 0 0;
+    }
+
+    #reset-btn {
+      margin-top: 1rem;
+      padding: 0.4rem 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #5b6af0;
+      background: transparent;
+      border: 1.5px solid #5b6af0;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 150ms, color 150ms;
+    }
+    #reset-btn:hover { background: #5b6af0; color: #fff; }
+  </style>
+</head>
+<body>
+  <p id="instruction">Where is <strong>$1 million</strong> on this number line? Click to place your guess.</p>
+
+  <svg id="nl-svg" viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr-r" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#6b7280" />
+      </marker>
+    </defs>
+
+    <line id="the-line" x1="40" y1="48" x2="655" y2="48"
+      stroke="#1a1d2e" stroke-width="2" marker-end="url(#arr-r)" />
+
+    <circle cx="40" cy="48" r="4" fill="#1a1d2e" />
+    <text x="40" y="70" text-anchor="middle" font-size="12" font-family="Inter, sans-serif" fill="#6b7280">0</text>
+    <text x="648" y="70" text-anchor="middle" font-size="12" font-family="Inter, sans-serif" fill="#6b7280">$1 billion</text>
+
+    <!-- TRUE_X = 40 + (1_000_000 / 1_000_000_000) * (648 - 40) ≈ 40.608 -->
+    <g id="true-marker" opacity="0">
+      <line x1="40.608" y1="28" x2="40.608" y2="68" stroke="#5b6af0" stroke-width="2" stroke-dasharray="4,3" />
+      <text x="40.608" y="20" text-anchor="middle" font-size="15" font-family="Inter, sans-serif" fill="#5b6af0" font-weight="600">$1M</text>
+    </g>
+
+    <circle id="guess-dot" cx="-100" cy="48" r="7"
+      fill="#f06050" stroke="white" stroke-width="2" opacity="0" />
+  </svg>
+
+  <div id="banner">
+    <p id="banner-title">Your guess</p>
+    <p id="banner-body"></p>
+    <p id="banner-sub"></p>
+    <p id="banner-miss"></p>
+    <button id="reset-btn" onclick="resetGame()">Try again</button>
+  </div>
+
+  <script>
+  (function() {
+    const svg    = document.getElementById('nl-svg');
+    const dot    = document.getElementById('guess-dot');
+    const marker = document.getElementById('true-marker');
+    const banner = document.getElementById('banner');
+
+    const X0 = 40, X1 = 648;
+    const MAX = 1_000_000_000;
+    const TRUE_VAL = 1_000_000;
+
+    function getSVGX(evt) {
+      const rect   = svg.getBoundingClientRect();
+      const scaleX = 700 / rect.width;
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      return (clientX - rect.left) * scaleX;
+    }
+
+    function handleClick(evt) {
+      const svgX = Math.max(X0, Math.min(X1, getSVGX(evt)));
+      const val  = Math.round(((svgX - X0) / (X1 - X0)) * MAX / 10) * 10;
+      const clampedX = X0 + (val / MAX) * (X1 - X0);
+
+      dot.setAttribute('cx', clampedX);
+      dot.setAttribute('opacity', '1');
+      marker.setAttribute('opacity', '1');
+      banner.style.display = 'block';
+
+      // Format guessed value
+      const rk = Math.round(val / 10) * 10;
+      let displayVal;
+      if (rk >= 1_000_000)     displayVal = '$' + (rk / 1_000_000).toFixed(1).replace(/\.?0+$/, '') + ' million';
+      else if (rk >= 1_000)    displayVal = '$' + (rk / 1_000).toFixed(0) + ',000';
+      else                      displayVal = '$' + rk.toLocaleString();
+
+      banner.querySelectorAll('p')[1].textContent = displayVal;
+
+      const missAmt = Math.abs(val - TRUE_VAL);
+      const missPct = (missAmt / TRUE_VAL);
+      const missEl  = banner.querySelectorAll('p')[3];
+
+      if (val === TRUE_VAL) {
+        missEl.textContent = 'Perfect! Exactly 1 million.';
+        missEl.style.color  = '#5b6af0';
+      } else {
+        const dir = val < TRUE_VAL ? 'low' : 'high';
+        missEl.textContent = `${Math.round(missPct)}× off — too ${dir}`
+        missEl.style.color = '#f06050';
+      }
+
+      // Tell parent iframe to resize
+      window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+    }
+
+    function resetGame() {
+      dot.setAttribute('cx', '-100');
+      dot.setAttribute('opacity', '0');
+      marker.setAttribute('opacity', '0');
+      banner.style.display = 'none';
+      window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+    }
+    window.resetGame = resetGame;
+
+    svg.addEventListener('click', handleClick);
+    svg.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      handleClick({ clientX: e.changedTouches[0].clientX });
+    });
+  })();
+  </script>
+</body>
+</html>
