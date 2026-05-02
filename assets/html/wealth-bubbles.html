@@ -118,10 +118,7 @@
     align-items: center;
     justify-content: center;
     transition: all 150ms;
-    opacity: 0;
-    pointer-events: none;
   }
-  #fs-btn.visible { opacity: 1; pointer-events: auto; }
   #fs-btn:hover { background: #fff; color: #1a1d2e; border-color: #5b6af0; }
 
   /* Fullscreen overrides — entire body goes fullscreen */
@@ -214,7 +211,7 @@
 </head>
 <body>
 
-<p class="prompt">How much money do you hope to have when you retire?</p>
+<p class="prompt">Enter a value significant to you &ndash; it could be your idea of wealth or financial security, how much you have saved, or how much debt you have.</p>
 
 <div id="preset-row">
   <button class="pb" data-val="50000">$50k</button>
@@ -244,8 +241,6 @@
 <p id="note"></p>
 
 <div id="add-section">
-  <span class="add-label">Add to comparison:</span>
-  <button class="add-btn" id="musk-btn" data-key="musk">+ Elon Musk ($428B)</button>
   <button id="clear-btn">&#x21ba; Start over</button>
 </div>
 
@@ -262,18 +257,19 @@
 
   const R_REF        = 100;
   const GAP          = 30;
-  const MIN_VIS_PX   = 3;     // minimum bubble radius in pixels (was 1)
+  const MIN_VIS_PX   = 0.5;   // minimum bubble radius in pixels
   const MIN_LABEL_PX = 20;
   const DUR_RESIZE   = 1500;  // ms — canvas zoom
   const DUR_POP      = 1500;  // ms — bubble appear
 
   // ── State ───────────────────────────────────────────────────────────────────
 
-  let userVal  = null;
-  let bubbles  = [];
-  let started  = false;
-  let busy     = false;
+  let userVal   = null;
+  let bubbles   = [];
+  let started   = false;
+  let busy      = false;
   let animToken = 0;   // only start() increments this
+  let muskAdded = false;
 
   // ── DOM refs ────────────────────────────────────────────────────────────────
 
@@ -282,7 +278,6 @@
   const annotEl  = document.getElementById('annotations');
   const noteEl   = document.getElementById('note');
   const addEl    = document.getElementById('add-section');
-  const muskBtn  = document.getElementById('musk-btn');
   const clearBtn = document.getElementById('clear-btn');
   const ciEl     = document.getElementById('ci');
   const goBtn    = document.getElementById('go-btn');
@@ -542,6 +537,14 @@
     b.grp.style.transform  = `translate(${b.worldX}px,0px)`;
 
     if (animate) {
+      // Clear stale annotations immediately — they're in screen-space
+      // and will point at wrong positions during the resize.
+      annotEl.replaceChildren();
+
+      // Update existing bubble geometry (text sizes, radii) for the NEW
+      // scale immediately so they look correct throughout the zoom transition.
+      bubbles.forEach(bb => { if (bb !== b) updateGeometry(bb, layout.s); });
+
       // Phase 1: resize canvas (new bubble stays hidden at scale(0))
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (tok !== animToken) return;
@@ -549,12 +552,10 @@
         applyPositions(DUR_RESIZE, key);
       }));
 
-      // Phase 2: after resize finishes, fix existing bubble geometry THEN pop
+      // Phase 2: after resize finishes, draw annotations & pop
       onTransEnd(worldEl, DUR_RESIZE, () => {
         if (tok !== animToken) return;
 
-        // Update text sizes & annotations for the new scale BEFORE the pop
-        bubbles.forEach(bb => { if (bb !== b) updateGeometry(bb, layout.s); });
         drawAnnotations(layout);
 
         b.inner.classList.add('pop');
@@ -603,12 +604,9 @@
     bubbles = [];
     started = false;
     busy    = true;
+    muskAdded = false;
     noteEl.textContent = '';
     addEl.classList.remove('visible');
-    fsBtn.classList.remove('visible');
-    muskBtn.disabled = false;
-    muskBtn.classList.remove('added');
-    muskBtn.textContent = '+ Elon Musk ($428B)';
 
     // Step 1: "You" bubble — instant
     addBubble('you', false, tok, () => {
@@ -621,10 +619,15 @@
         addBubble('billion', true, tok, () => {
           if (tok !== animToken) return;
           addEl.classList.add('visible');
-          fsBtn.classList.add('visible');
           busy = false;
           updateNote();
           notifyParent();
+
+          // Auto-add Musk 3 s after the $1B bubble reaches full size
+          setTimeout(() => {
+            if (tok !== animToken) return;
+            addMusk();
+          }, 3000);
         });
       }, 500);
     });
@@ -639,13 +642,10 @@
     bubbles = [];
     started = false;
     busy    = false;
+    muskAdded = false;
     userVal = null;
     noteEl.textContent = '';
     addEl.classList.remove('visible');
-    fsBtn.classList.remove('visible');
-    muskBtn.disabled = false;
-    muskBtn.classList.remove('added');
-    muskBtn.textContent = '+ Elon Musk ($428B)';
 
     // Reset UI controls
     document.querySelectorAll('.pb').forEach(b => b.classList.remove('active'));
@@ -678,10 +678,13 @@
 
   // ── Fullscreen toggle ───────────────────────────────────────────────────────
 
+  let preFullscreenHeight = null;
+
   fsBtn.addEventListener('click', () => {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
+      preFullscreenHeight = document.documentElement.scrollHeight;
       document.body.requestFullscreen().catch(() => {});
     }
   });
@@ -695,6 +698,12 @@
       applyWorld(layout, 0);
       applyPositions(0, null);
       afterAnim(layout);
+      if (!document.fullscreenElement && preFullscreenHeight !== null) {
+        try {
+          window.parent.postMessage({ iframeHeight: preFullscreenHeight }, '*');
+        } catch (e) {}
+        preFullscreenHeight = null;
+      }
     }, 100);
   });
 
@@ -739,24 +748,19 @@
     });
   });
 
-  // Musk — one-way add (no toggle)
-  muskBtn.addEventListener('click', () => {
-    if (busy || !started) return;
-    if (muskBtn.classList.contains('added')) return;
-
+  // Musk — one-way auto-add
+  function addMusk() {
+    if (busy || !started || muskAdded) return;
     busy = true;
-    muskBtn.disabled = true;
-    muskBtn.classList.add('added');
-    muskBtn.textContent = 'Elon Musk ($428B)';
-
-    const tok = animToken;  // use current token, don't create new one
+    muskAdded = true;
+    const tok = animToken;
     addBubble('musk', true, tok, () => {
       if (tok !== animToken) return;
       busy = false;
       updateNote();
       notifyParent();
     });
-  });
+  }
 
   // Clear — reset everything
   clearBtn.addEventListener('click', clear);

@@ -187,6 +187,10 @@
       e.preventDefault();
       handleClick({ clientX: e.changedTouches[0].clientX });
     });
+
+    window.addEventListener('load', function() {
+      window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+    });
   })();
   </script>
 </body>

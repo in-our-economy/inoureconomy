@@ -525,6 +525,117 @@
     }
   }
 
+  // ── Footnote Popovers ────────────────────────────────────────────────────
+
+  (function initFootnotes() {
+    var footnoteSection = document.querySelector('.footnotes');
+    if (!footnoteSection) return;
+
+    // Build the popover element
+    var popover = document.createElement('div');
+    popover.className = 'footnote-popover';
+    popover.setAttribute('role', 'tooltip');
+    popover.setAttribute('aria-live', 'polite');
+    popover.innerHTML =
+      '<button class="footnote-popover__close" aria-label="Close footnote">&times;</button>' +
+      '<div class="footnote-popover__content"></div>';
+    document.body.appendChild(popover);
+
+    var contentEl = popover.querySelector('.footnote-popover__content');
+    var closeBtn  = popover.querySelector('.footnote-popover__close');
+    var activeRef = null;
+
+    function getFootnoteContent(fnId) {
+      var li = document.getElementById(fnId);
+      if (!li) return null;
+      var clone = li.cloneNode(true);
+      // Remove the return-to-article backlink
+      var backlink = clone.querySelector('.reversefootnote, [role="doc-backlink"]');
+      if (backlink) backlink.parentNode.removeChild(backlink);
+      // Extract innerHTML of <p> elements so the number flows inline with the text
+      var ps = clone.querySelectorAll('p');
+      if (ps.length) {
+        return Array.from(ps).map(function (p) { return p.innerHTML.trim(); }).join(' ');
+      }
+      return clone.textContent.trim();
+    }
+
+    function positionPopover(refEl) {
+      var rect    = refEl.getBoundingClientRect();
+      var scrollY = window.scrollY || window.pageYOffset;
+      var scrollX = window.scrollX || window.pageXOffset;
+
+      // Temporarily show to measure width
+      popover.style.visibility = 'hidden';
+      popover.classList.add('is-visible');
+      var popW = popover.offsetWidth;
+      popover.classList.remove('is-visible');
+      popover.style.visibility = '';
+
+      var centerX  = rect.left + scrollX + rect.width / 2;
+      var left     = centerX - popW / 2;
+      var margin   = 8;
+      var maxLeft  = document.documentElement.clientWidth - popW - margin;
+      left = Math.max(margin, Math.min(left, maxLeft));
+
+      popover.style.left = left + 'px';
+      popover.style.top  = (rect.bottom + scrollY + 8) + 'px';
+
+      // Arrow points to the superscript center
+      var arrowLeft = centerX - left;
+      arrowLeft = Math.max(12, Math.min(arrowLeft, popW - 12));
+      popover.style.setProperty('--fn-arrow-left', arrowLeft + 'px');
+    }
+
+    function showPopover(refEl, fnId, number) {
+      var html = getFootnoteContent(fnId);
+      if (!html) return;
+      contentEl.innerHTML =
+        '<p><span class="footnote-popover__number">' + number + '.&nbsp;</span>' + html + '</p>';
+      positionPopover(refEl);
+      popover.classList.add('is-visible');
+      activeRef = refEl;
+    }
+
+    function hidePopover() {
+      popover.classList.remove('is-visible');
+      activeRef = null;
+    }
+
+    // Wire up each footnote reference
+    document.querySelectorAll('sup[id^="fnref:"] a, a[role="doc-noteref"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        var href = a.getAttribute('href') || '';
+        var fnId = href.replace(/^#/, '');
+        // Extract the ordinal number from the sup's id (fnref:1 → 1)
+        var sup    = a.closest('sup') || a.parentElement;
+        var supId  = sup ? sup.id : '';
+        var number = supId.replace(/^fnref:/, '').replace(/:.*$/, '');
+
+        if (popover.classList.contains('is-visible') && activeRef === a) {
+          hidePopover();
+        } else {
+          showPopover(a, fnId, number);
+        }
+      });
+    });
+
+    closeBtn.addEventListener('click', hidePopover);
+
+    document.addEventListener('click', function (e) {
+      if (!popover.contains(e.target) && !e.target.closest('sup[id^="fnref:"]')) {
+        hidePopover();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') hidePopover();
+    });
+
+    // Endnotes remain visible at the bottom of the page
+  }());
+
   // ── Animate elements on scroll ───────────────────────────────────────────
 
   if ('IntersectionObserver' in window) {
