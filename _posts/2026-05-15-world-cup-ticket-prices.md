@@ -8,10 +8,9 @@ tags: [inequality, visualization, affordability, new analyses]
 author: "Cyrus O'Brien"
 redirect_from:
   - /blog/2025/05/16/world-cup-ticket-prices/
+  - /blog/2025/05/15/world-cup-ticket-prices/
 ---
 ### Most Americans can't afford to attend the World Cup
-
-*this is an accidental duplicate post*
 
 The World Cup is being held in North America for the first time in 32 years, but most Americans can't afford to attend.
 
@@ -168,5 +167,3 @@ Those of you who are interested in confidence intervals can see them below in th
 
 
 *The visualization above is built with the javascript library Observable. There are no trackers.*
-
-*Whoops! This post has the wrong date, but I'm leaving it here because I already shared the link.*
