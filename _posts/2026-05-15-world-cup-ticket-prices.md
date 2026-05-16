@@ -2,10 +2,12 @@
 layout: post
 title:  "How Many American Families Can Afford to Attend the World Cup?"
 subtitle: "2026 is not 1994"
-date: 2025-05-15
+date: 2026-05-16
 categories: [Inequality, New Analyses]
 tags: [inequality, visualization, affordability, new analyses]
 author: "Cyrus O'Brien"
+redirect_from:
+  - /blog/2025/05/16/world-cup-ticket-prices/
 ---
 ### Most Americans can't afford to attend the World Cup
 
