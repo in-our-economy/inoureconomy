@@ -412,7 +412,7 @@ What sets this blog apart from many other great projects about inequality is tha
 })();
 </script>
 
-You can dowload and share these. If you have suggestions about new/better/different permuations, send an email and I'll create them for you.
+You can download and share these. If you have suggestions about new/better/different permuations, send an email and I'll create them for you.
 
 ---
 

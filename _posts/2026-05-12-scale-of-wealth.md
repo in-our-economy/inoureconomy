@@ -37,7 +37,7 @@ The area of each circle is proportional to dollar amount. Your circle is the ref
 
 That's not a flaw in the visualization. That's the point. 
 
-Actually the visualization  &ndash; like so many other things &ndash; is skewed in the billionaires' favor, as I set your value to be a minimum of one pixel. Unless you chose a very large value or are workig on a very large screen, your bubble is likely inflated &ndash; to the size of one pixel. (The visualization can be a bit glitchy with values less than $500k)
+Actually the visualization &ndash; like so many other things &ndash; is skewed in the billionaires' favor, as I set your value to be a minimum of one pixel. Unless you chose a very large value or are working on a very large screen, your bubble is likely inflated &ndash; to the size of one pixel. (The visualization can be a bit glitchy with values less than $500k)
 
 
 ## Why does this matter?

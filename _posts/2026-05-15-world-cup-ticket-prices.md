@@ -7,18 +7,18 @@ categories: [Inequality, New Analyses]
 tags: [inequality, visualization, affordability, new analyses]
 author: "Cyrus O'Brien"
 ---
-## Most American's can't afford to attend the World Cup
+## Most Americans can't afford to attend the World Cup
 
-The World Cup is being held in North America for the first time in 32 years, but most American's can't afford to attend.
+The World Cup is being held in North America for the first time in 32 years, but most Americans can't afford to attend.
 
 * 83% of U.S. households can't afford the cheapest tickets available on the resale market to the World Cup Final at Metlife Stadium.
 * 73% of U.S. households can't afford the cheapest face value tickets to the final.
 * 78% of U.S. households can't afford great seats at a group stage game.
 * The only affordable tickets (face value tickets for group games) are practically unavailable because of the lottery operated by FIFA.
 
-The inaffordability of tickets to the 2026 World Cup stands in stark contrast to the last time the U.S. hosted the event in 1994. In 1994 the majority of Americans could afford to attend the final - even if they had to buy a ticket on the resale market. 
+The unaffordability of tickets to the 2026 World Cup stands in stark contrast to the last time the U.S. hosted the event in 1994. In 1994 the majority of Americans could afford to attend the final - even if they had to buy a ticket on the resale market. 
 
-The charts below show how the affordibility of ticket prices has changed from 1994 to 2026. There are some assumptions 
+The charts below show how the affordability of ticket prices has changed from 1994 to 2026. You can read about the methdology below. The picture is clear: This World Cup is unaffordable to most Americans. 
 
 <div class="viz-wrapper" style="margin: 2rem 0;">
   <iframe
