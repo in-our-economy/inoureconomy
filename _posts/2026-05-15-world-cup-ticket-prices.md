@@ -18,7 +18,7 @@ The World Cup is being held in North America for the first time in 32 years, but
 
 The unaffordability of tickets to the 2026 World Cup stands in stark contrast to the last time the U.S. hosted the event in 1994. In 1994 the majority of Americans could afford to attend the final - even if they had to buy a ticket on the resale market. 
 
-The charts below show how the affordability of ticket prices has changed from 1994 to 2026. You can read about the methdology below. The picture is clear: This World Cup is unaffordable to most Americans. 
+The charts below show how the affordability of ticket prices has changed from 1994 to 2026. You can read about the methodology below. The picture is clear: This World Cup is unaffordable to most Americans. 
 
 <div class="viz-wrapper" style="margin: 2rem 0;">
   <iframe
