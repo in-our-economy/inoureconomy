@@ -2,7 +2,7 @@
 layout: post
 title: "A billionaire has more money than you can imagine"
 subtitle: ""
-date: 2025-04-11
+date: 2025-05-11
 categories: [Interactives, Inequality, Billionaries]
 tags: [billionaries, inequality, wealth, interactives, games]
 image: 

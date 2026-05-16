@@ -2,7 +2,7 @@
 layout: post
 title: "Announcing In Our Economy"
 subtitle: "A 5-month experiment leading up to the release of the Survey of Consumer Finances"
-date: 2026-04-01
+date: 2026-05-10
 categories: [Commentary]
 tags: [inequality, wealth]
 author: "Cyrus O'Brien"

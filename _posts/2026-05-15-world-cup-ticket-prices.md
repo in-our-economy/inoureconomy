@@ -2,7 +2,7 @@
 layout: post
 title:  "How Many American Families Can Afford to Attend the World Cup?"
 subtitle: "2026 is not 1994"
-date: 2025-05-14
+date: 2025-05-15
 categories: [Inequality, New Analyses]
 tags: [inequality, visualization, affordability, new analyses]
 author: "Cyrus O'Brien"
