@@ -41,8 +41,6 @@ nav_links:
     url: /
   - title: Blog
     url: /blog/
-  - title: Data
-    url: /data/
   - title: About
     url: /about/
 

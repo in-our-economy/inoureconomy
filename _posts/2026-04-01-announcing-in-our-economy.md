@@ -29,7 +29,9 @@ So stay tuned!
 
 As a build-up to late October, I'll be publishing new analyses that are newsworthy. The first are a series about World Cup ticket prices and how they compare to the last time the U.S. hosted the event in 1994. **If you are a reporter and have a question about affordability, reach out and I may be able to leverage publicly available data to answer it for you.**
 
-### The underlying concept of this work is that when elites talk about "the economy," they're not talking about you.
+### The motivating idea 
+
+**When elites talk about "the economy," they're not talking about you.**
 
 When the President says we have "[the greatest economy ever](https://www.euronews.com/business/2026/02/24/greatest-economy-ever-the-numbers-behind-trumps-boasting)" or the Treasury Secretary says 2026 is poised to be a "[feast and the banquet](https://www.facebook.com/watch/?v=2613868452325685)" for the American economy, they're not talking about you. They're not even talking about people.
 
@@ -413,7 +415,7 @@ What sets this blog apart from many other great projects about inequality is tha
 })();
 </script>
 
-You can dowload and share these. If you have suggestions about new/better/different permuations, post them in the comments and I'll create them for you.
+You can dowload and share these. If you have suggestions about new/better/different permuations, send an email and I'll create them for you.
 
 ---
 
