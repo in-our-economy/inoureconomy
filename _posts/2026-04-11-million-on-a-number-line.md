@@ -11,8 +11,6 @@ image_colorized: true
 featured: true
 ---
 
-## How much is a billion, really?
-
 When people talk about billionaires, it's hard to phathom just how much money we're talking about. I created this game to help people understand just how much money a billion dollars is.
 
 Below is a number line, with $0 at the left-hand side and $1 billion on the right-hand side. Your task is to click where you think **$1 million** is. If you find this interesting, please share with your friends or on social media. 

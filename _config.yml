@@ -6,11 +6,7 @@ baseurl: ""
 url: ""
 
 author:
-  name: Your Name
-  email: you@example.com
-  bio: >-
-    Economist and writer exploring how policy shapes people's lives.
-  twitter: yourhandle
+  name: Cyrus O'Brien
 
 # Build settings
 markdown: kramdown
@@ -51,7 +47,7 @@ nav_links:
     url: /about/
 
 # Social
-social:
-  twitter: "https://twitter.com/yourhandle"
-  github: "https://github.com/yourusername"
-  email: "mailto:you@example.com"
+# social:
+ # twitter: "https://twitter.com/yourhandle"
+ # github: "https://github.com/yourusername"
+ # email: "mailto:you@example.com"
