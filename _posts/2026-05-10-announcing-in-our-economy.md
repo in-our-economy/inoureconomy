@@ -1,16 +1,13 @@
 ---
 layout: post
 title: "Announcing In Our Economy"
-subtitle: "A 5-month experiment leading up to the release of the Survey of Consumer Finances"
 date: 2026-05-10
 categories: [Commentary]
 tags: [inequality, wealth]
 author: "Cyrus O'Brien"
 featured: true
 ---
-
-
-### A 5-month experiment leading up to the release of the Survey of Consumer Finances in the Fall
+## A 5-month experiment leading up to the release of the Survey of Consumer Finances
 
 In October 2026 - just weeks before the midterm elections - the Federal Reserve should release the Survey of Consumer Finances (SCF). This survey is the gold standard source for data about economic inequality in the U.S. and the source of almost every stat you've ever heard about the racial wealth gap or about how much wealth the 1% or 0.1% have compared to the rest us.
 

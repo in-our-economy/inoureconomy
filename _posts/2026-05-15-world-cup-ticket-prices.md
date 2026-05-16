@@ -7,6 +7,7 @@ categories: [Inequality, New Analyses]
 tags: [inequality, visualization, affordability, new analyses]
 author: "Cyrus O'Brien"
 ---
+## Most American's can't afford to attend the World Cup
 
 The World Cup is being held in North America for the first time in 32 years, but most American's can't afford to attend.
 
