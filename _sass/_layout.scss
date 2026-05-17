@@ -484,6 +484,7 @@
   color: $color-text;
   [data-theme="dark"] & { color: $color-dark-text; }
   max-width: 68ch;
+  @media (max-width: $bp-sm) { font-size: 1.1875rem; }
 
   h2 { font-size: $font-size-2xl; margin-top: $space-10; margin-bottom: $space-4; }
   h3 { font-size: $font-size-xl; margin-top: $space-8; margin-bottom: $space-3; }
