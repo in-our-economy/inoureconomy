@@ -289,6 +289,7 @@
   color: var(--color-text-muted);
   margin-bottom: $space-5;
   min-height: 2em;
+  width: 100%;
 }
 
 .hero-dynamic--light {
@@ -304,7 +305,8 @@
   font-weight: 600;
   border-right: 2px solid currentColor;
   padding-right: 2px;
-  white-space: nowrap;
+  max-width: 100%;
+  display: inline;
   animation: cursor-blink 0.75s step-end infinite;
 
   .hero-dynamic & { color: $color-primary; border-color: $color-primary; }
