@@ -7,3 +7,5 @@ _site/
 vendor/
 .DS_Store
 /drafts
+.DS_Store
+.DS_Store

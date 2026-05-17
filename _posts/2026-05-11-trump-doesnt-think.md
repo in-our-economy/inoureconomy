@@ -2,7 +2,7 @@
 layout: post
 title:  "Why Trump Doesn't Think about Your Finances"
 subtitle: ""
-date: 2025-05-11
+date: 2026-05-11
 categories: [Inequality, Interactives]
 tags: [wealth, inequality, billionaires, visualization, interactive, games]
 author: "Cyrus O'Brien"

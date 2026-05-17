@@ -2,7 +2,7 @@
 layout: post
 title:  "The poorest billionaire is far too rich"
 subtitle: "And Elon Musk's wealth is a crime"
-date: 2025-05-12
+date: 2026-05-12
 categories: [Inequality, Interactives]
 tags: [wealth, inequality, billionaires, visualization, interactive, games, new analyses]
 author: "Cyrus O'Brien"
