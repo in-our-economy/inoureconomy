@@ -7,10 +7,6 @@ permalink: /about/
 
 <div class="about-bio" markdown="1">
 
-### Disclaimer
-
-This website is the personal project of Cyrus O'Brien, PhD. You can read about me and my work at [www.cyrusobrien.com](https://cyrusobrien.com). The work published here is entirely mine and does not represent the views or opinions of any other person or organization. 
-
 
 ### How you can help
 
@@ -18,9 +14,12 @@ If you want to help, please **share the content** on your own platforms.
 
 You can also find [this content on Substack](https://inoureconomy.substack.com/) to receive updates in your inbox. 
 
+<iframe src="https://inoureconomy.substack.com/embed" width="480" height="320" style="border: 1px solid #EEE; background: white" frameborder="0" scrolling="no"></iframe>
+
 ### Get in touch
 
 I'd love to hear from readers. You can reach me at: cyrusobrien [at] gmail.com
+
 
 
 ### Credentials
@@ -32,10 +31,17 @@ I'd love to hear from readers. You can reach me at: cyrusobrien [at] gmail.com
 - Expert panelist for survey design for the U.S. Department of Justice's Bureau of Justice Statistics.
 
 
+
+### Disclaimer
+
+This website is the personal project of Cyrus O'Brien, PhD. You can read about me and my work at [www.cyrusobrien.com](https://cyrusobrien.com). The work published here is entirely mine and does not represent the views or opinions of any other person or organization. 
+
+
+
 </div>
 
 ---
 
 ## About this site
 
-This site is built with [Jekyll](https://jekyllrb.com) and hosted on [GitHub Pages](https://pages.github.com). The source is [available on GitHub](https://github.com/yourusername/inoureconomy). 
+This site is built with [Jekyll](https://jekyllrb.com) and hosted on [GitHub Pages](https://pages.github.com).
