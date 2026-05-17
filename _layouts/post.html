@@ -79,5 +79,19 @@ layout: default
         {% endif %}
       </div>
     </div>
+
+    {%- if page.id -%}
+    <div class="comments-section">
+      <h2>Comments</h2>
+      <div id="cusdis_thread"
+        data-host="https://cusdis.com"
+        data-app-id="a1f6255f-b0d9-44d2-a416-b4da08143c59"
+        data-page-id="{{ page.id }}"
+        data-page-url="{{ site.url }}{{ page.baseurl }}{{ page.url }}"
+        data-page-title="{{ page.title }}"
+      ></div>
+      <script defer src="https://cusdis.com/js/cusdis.es.js"></script>
+    </div>
+    {%- endif -%}
   </div>
 </article>
