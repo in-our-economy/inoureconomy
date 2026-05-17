@@ -202,6 +202,10 @@ What sets this blog apart from many other great projects about inequality is tha
   // Every string literal uses backtick template literals so Jekyll's
   // smart-quote processor never sees ' or “ as JS string delimiters.
   const SLIDES = [
+     {
+      economy: `PROFITS are at record highs`,
+      ours: `PRICES are at record highs.`
+    },
     {
       economy: `Commodity prices are strong`,
       ours: `We're paying more at the pump, the grocery store, and the utility bill.`
