@@ -8,7 +8,7 @@ tags: [wealth, inequality, billionaires, visualization, interactive, games, new 
 author: "Cyrus O'Brien"
 ---
 
-Here's an interactive visualization that allows you to put the wealth of the poorest in perspective. Enter a number that is meaningful to you &ndash; maybe how much you hope to save for retirement, how much money you'd have if you were insanely wealthy, anything you like. Then you'll see how this compares to the wealth of the poorest billionaire. As a final step, you see how your idea of wealth compares to the world's richest man, Elon Musk.
+Here's an interactive visualization that allows you to put the wealth of the poorest billionaire in perspective. Enter a number that is meaningful to you &ndash; maybe how much you hope to save for retirement, how much money you'd have if you were insanely wealthy, anything you like. Then you'll see how this compares to the wealth of the poorest billionaire. As a final step, you see how your idea of wealth compares to the world's richest man, Elon Musk.
 
 <div class="viz-container">
   <iframe
