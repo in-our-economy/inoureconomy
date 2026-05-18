@@ -181,7 +181,7 @@ d3.csv("/assets/data/world-cup-affordability-all-households.csv").then(raw => {
     grid.appendChild(cell);
   });
 
-  sendHeight();
+  requestAnimationFrame(sendHeight);
 });
 
 // Notify parent of height for responsive iframe
@@ -191,7 +191,11 @@ function sendHeight() {
 }
 window.addEventListener('load', sendHeight);
 window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 500);
 setTimeout(sendHeight, 1500);
+
+// Keep height in sync if content shifts after load
+new ResizeObserver(sendHeight).observe(document.body);
 </script>
 </body>
 </html>

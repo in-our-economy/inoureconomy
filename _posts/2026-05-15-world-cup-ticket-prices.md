@@ -30,7 +30,7 @@ The charts below show how the affordability of ticket prices has changed from 19
     title="World Cup ticket affordability bar charts comparing 1994 and 2026"
     scrolling="no"
     loading="lazy"
-    style="width: 100%; border: none; min-height: 520px; border-radius: 8px; overflow: hidden;">
+    style="width: 100%; border: none; min-height: 1000px; border-radius: 8px; overflow: hidden;">
   </iframe>
 </div>
 
