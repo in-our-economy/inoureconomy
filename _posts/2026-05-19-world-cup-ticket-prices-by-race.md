@@ -11,7 +11,7 @@ author: "Cyrus O'Brien"
 
 The World Cup is being held in North America for the first time in 32 years — and the ticket prices are unaffordable for most Americans. But racial and economic inequality results in Black and Latino households facing especially steep barriers to attending "the Greatest Show on Earth" than white households.
 
-* 93% of Black U.S. households and 93% of Latino households can't afford the cheapest resale tickets to the World Cup Final at MetLife Stadium, compared to 80% of White households.
+* 93% of Black U.S. households and 93% of Latino U.S. households can't afford the cheapest resale tickets to the World Cup Final at MetLife Stadium, compared to 80% of White households.
 * 87% of Black households and 87% of Latino households can't afford the cheapest face value tickets to the final, compared to 69% of White households.
 * In 1994, the picture was also unequal: roughly 64% of Black and Latino households couldn't afford World Cup Final resale tickets, compared to 36% of White households.
 
