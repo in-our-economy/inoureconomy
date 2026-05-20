@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Cup Ticket Affordability</title>
+  <title>World Cup Ticket Affordability by Race</title>
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js"></script>
   <style>
@@ -14,6 +14,7 @@
       color: #1a1a2e;
       padding: 1.5rem 1rem 1rem;
       line-height: 1.5;
+      overflow-x: hidden;
     }
     .overall-title {
       text-align: center;
@@ -32,13 +33,13 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem 1.5rem;
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 620px) {
       .charts-grid {
         grid-template-columns: 1fr;
-        max-width: 360px;
+        max-width: 380px;
       }
     }
     .chart-cell {
@@ -49,21 +50,22 @@
     .chart-cell h3 {
       font-size: 0.95rem;
       font-weight: 600;
-      margin-bottom: 0.1rem;
+      margin-bottom: 0.3rem;
       text-align: center;
       color: #1a1a2e;
     }
     .chart-cell .subtitle {
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       color: #666;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       text-align: center;
     }
     .legend-row {
       display: flex;
       gap: 1.5rem;
       justify-content: center;
-      margin-top: 1.5rem;
+      margin-top: 0;
+      margin-bottom: 1.2rem;
       font-size: 0.82rem;
       color: #333;
     }
@@ -84,71 +86,87 @@
       margin-top: 1rem;
       text-align: center;
       line-height: 1.5;
-      max-width: 600px;
+      max-width: 620px;
       margin-left: auto;
       margin-right: auto;
     }
     /* Observable Plot overrides */
     [aria-label="y-axis tick label"] { font-size: 11px; }
-    [aria-label="x-axis tick label"] { font-size: 12px; font-weight: 500; }
-
+    [aria-label="x-axis tick label"] { font-size: 10px; font-weight: 500; }
+    [aria-label="fx-axis tick label"] { font-size: 10.5px; font-weight: 600; }
   </style>
 </head>
 <body>
 
-<div class="overall-title">World Cup Ticket Unaffordability</div>
+<div class="overall-title">World Cup Ticket Unaffordability by Race</div>
 <div class="overall-subtitle">% of U.S. households that cannot afford tickets, 1994 vs. 2026</div>
+
+<div class="legend-row">
+  <span><span class="swatch" style="background:#6B4F9E;"></span> White</span>
+  <span><span class="swatch" style="background:#E8944A;"></span> Latino</span>
+    <span><span class="swatch" style="background:#4A90A4;"></span> Black</span>
+
+</div>
 
 <div class="charts-grid" id="charts-grid"></div>
 
-<div class="legend-row">
-  <span><span class="swatch" style="background:#4A90A4;"></span> 1994 World Cup</span>
-  <span><span class="swatch" style="background:#D4574E;"></span> 2026 World Cup</span>
-</div>
 <div class="note">
   Based on Cyrus O'Brien's analysis of Survey of Consumer Finances microdata.<br>
   "Unaffordable" = ticket cost for family exceeds the value of household's checking account.
 </div>
 
-
 <script>
-// Map survey year to World Cup year for display
 const YEAR_MAP = { "1995": "1994", "2022": "2026" };
+const RACE_COLORS = { "White": "#6B4F9E", "Black": "#4A90A4", "Latino": "#E8944A" };
+const RACE_ORDER = ["White",  "Latino", "Black",];
+const YEAR_ORDER = ["1994", "2026"];
 
-// Load data from CSV
-d3.csv("/assets/data/world-cup-affordability-all-households.csv").then(raw => {
+
+d3.csv("/assets/data/world-cup-affordability-by-race.csv").then(raw => {
   const data = raw.map(d => ({
     results: +d.results,
     se:      +d.se,
     lower:   +d["(lower"],
     upper:   +d["upper)"],
     year:    YEAR_MAP[d.year.trim()] || d.year.trim(),
-    category: d.category.trim()
+    category: d.category.trim(),
+    race: d.race.trim()
   }));
 
-  // Derive categories in the order they appear in the CSV
   const categories = [...new Set(data.map(d => d.category))];
-
   const grid = document.getElementById('charts-grid');
+
+  // Responsive chart width: fit within the column, accounting for body padding and grid gap
+  const numCols = window.innerWidth <= 620 ? 1 : 2;
+  const bodyPad = 32; // 1rem each side
+  const gridGap = numCols > 1 ? 24 : 0; // 1.5rem column gap
+  const chartWidth = Math.max(260, Math.floor((window.innerWidth - bodyPad - gridGap) / numCols));
 
   categories.filter(c => !c.toLowerCase().includes("through")).forEach(category => {
     const subset = data.filter(d => d.category === category);
+    const years = [...new Set(subset.map(d => d.year))].sort();
 
     const cell = document.createElement('div');
     cell.className = 'chart-cell';
     cell.innerHTML = `<h3>${category}</h3>`;
 
     const chart = Plot.plot({
-      width: 300,
+      width: chartWidth,
       height: 250,
       marginLeft: 50,
       marginBottom: 30,
-      marginTop: 25,
+      marginTop: 20,
+      fx: {
+        domain: years,
+        label: null,
+        padding: 0.08
+      },
       x: {
         type: "band",
-        domain: ["1994", "2026"],
+        domain: RACE_ORDER,
         label: null,
-        padding: 0.35
+        axis: null,
+        padding: 0.2
       },
       y: {
         domain: [0, 100],
@@ -159,19 +177,23 @@ d3.csv("/assets/data/world-cup-affordability-all-households.csv").then(raw => {
       },
       marks: [
         Plot.barY(subset, {
-          x: "year",
+          fx: "year",
+          x: "race",
           y: "results",
-          fill: d => d.year === "1994" ? "#4A90A4" : "#D4574E",
-          rx: 3
+          fill: d => RACE_COLORS[d.race],
+          rx: 2,
+          title: d => `${d.race}: ${d.results.toFixed(0)}%`,
+          tip: true
         }),
         Plot.text(subset, {
-          x: "year",
+          fx: "year",
+          x: "race",
           y: "upper",
           text: d => d.results.toFixed(0) + "%",
-          dy: -10,
-          fontSize: 12,
+          dy: -8,
+          fontSize: 9,
           fontWeight: "bold",
-          fill: d => d.year === "1994" ? "#4A90A4" : "#D4574E"
+          fill: d => RACE_COLORS[d.race]
         }),
         Plot.ruleY([0])
       ]
@@ -182,6 +204,7 @@ d3.csv("/assets/data/world-cup-affordability-all-households.csv").then(raw => {
   });
 
   // Fire sendHeight several times after charts finish rendering
+  // to catch any delayed layout settling on slow/mobile connections
   requestAnimationFrame(() => {
     sendHeight();
     setTimeout(sendHeight, 300);
@@ -193,6 +216,7 @@ d3.csv("/assets/data/world-cup-affordability-all-households.csv").then(raw => {
 
 let _sendHeightTimer;
 function sendHeight() {
+  // Debounce rapid-fire calls (e.g. from ResizeObserver) to one per 50ms
   clearTimeout(_sendHeightTimer);
   _sendHeightTimer = setTimeout(() => {
     const h = document.documentElement.scrollHeight;
@@ -202,9 +226,11 @@ function sendHeight() {
 
 window.addEventListener('load', sendHeight);
 window.addEventListener('resize', sendHeight);
+// Catch any layout shift after initial load (e.g. lazy iframe becoming visible)
 setTimeout(sendHeight, 500);
 setTimeout(sendHeight, 1500);
 
+// Observe both body and the charts grid so any size change triggers a report
 const _ro = new ResizeObserver(sendHeight);
 _ro.observe(document.body);
 const _grid = document.getElementById('charts-grid');

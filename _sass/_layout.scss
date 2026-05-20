@@ -484,6 +484,7 @@
   color: $color-text;
   [data-theme="dark"] & { color: $color-dark-text; }
   max-width: 68ch;
+  min-width: 0; // prevent grid blowout from wide content (e.g. long URLs in tables)
   @media (max-width: $bp-sm) { font-size: 1.1875rem; }
 
   h2 { font-size: $font-size-2xl; margin-top: $space-10; margin-bottom: $space-4; }
@@ -520,6 +521,9 @@
   hr { border: none; border-top: 1px solid var(--color-border); margin: $space-10 0; }
 
   table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     width: 100%;
     border-collapse: collapse;
     margin-bottom: $space-6;

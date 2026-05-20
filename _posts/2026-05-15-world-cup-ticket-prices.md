@@ -23,6 +23,13 @@ The unaffordability of tickets to the 2026 World Cup stands in stark contrast to
 
 The charts below show how the affordability of ticket prices has changed from 1994 to 2026. You can read about the methodology below. The picture is clear: This World Cup is unaffordable to most Americans. 
 
+<style>
+  #world-cup-affordability-iframe { min-height: 1000px; }
+  @media (max-width: 620px) {
+    #world-cup-affordability-iframe { min-height: 2200px; }
+  }
+</style>
+
 <div class="viz-wrapper" style="margin: 2rem 0;">
   <iframe
     id="world-cup-affordability-iframe"
@@ -30,7 +37,7 @@ The charts below show how the affordability of ticket prices has changed from 19
     title="World Cup ticket affordability bar charts comparing 1994 and 2026"
     scrolling="no"
     loading="lazy"
-    style="width: 100%; border: none; min-height: 1000px; border-radius: 8px; overflow: hidden;">
+    style="width: 100%; border: none; border-radius: 8px; overflow: hidden;">
   </iframe>
 </div>
 
@@ -38,7 +45,9 @@ The charts below show how the affordability of ticket prices has changed from 19
   window.addEventListener('message', function(e) {
     if (e.data && e.data.iframeHeight) {
       var el = document.getElementById('world-cup-affordability-iframe');
-      if (el) el.style.height = Math.max(520, e.data.iframeHeight) + 'px';
+      if (!el) return;
+      var newH = Math.max(520, e.data.iframeHeight);
+      if (newH > el.offsetHeight) el.style.height = newH + 'px';
     }
   });
 </script>
