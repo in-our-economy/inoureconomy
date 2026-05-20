@@ -8,7 +8,7 @@ tags: [inequality, visualization, affordability, new analyses]
 author: "Cyrus O'Brien"
 ---
 
-### Most renters have very little liquidity
+### Most renters have very little financial cusion
 
 Renting a home is already expensive — but what's less visible is how little financial cushion most renters have. A quarter of renting households in the United States have less than $200 in cash savings, and nearly half have less than $1,000.
 
