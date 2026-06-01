@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Most working families couldn't afford food and rent for a single month if their income were interrupted"
+title:  "Most working families couldn't afford food and housing for a single month if their income were interrupted"
 subtitle: "More than half of working households are living paycheck to paycheck — and the numbers are far worse for Black and Latino families"
 date: 2026-06-01
 categories: [Inequality, New Analyses]
@@ -12,7 +12,7 @@ author: "Cyrus O'Brien"
 
 Work is supposed to provide economic security. But for the majority of working households in the United States, a single missed paycheck — a layoff, a medical emergency, an unexpected car repair — could make it impossible to pay for food and housing at the same time.
 
-My analysis of the 2022 Survey of Consumer Finances finds that **more than half of all working households don't have enough cash savings to cover one month of food and rent** if their income were interrupted. The numbers are even starker when broken down by race:
+My analysis of the 2022 Survey of Consumer Finances finds that **more than half of all working households don't have enough cash savings to cover one month of food and housing** if their income were interrupted. The numbers are even starker when broken down by race:
 
 * **76% of working Latino families** can't cover a single month of food and housing from savings.
 * **71% of working Black families** face the same situation.
@@ -30,7 +30,7 @@ My analysis of the 2022 Survey of Consumer Finances finds that **more than half 
   <iframe
     id="working-families-iframe"
     src="/assets/html/working-families-cant-afford-food-and-rent.html"
-    title="Bar chart showing share of working households unable to cover one month of food and rent from savings, by race"
+    title="Bar chart showing share of working households unable to cover one month of food and housing from savings, by race"
     scrolling="no"
     loading="lazy"
     style="width: 100%; border: none; border-radius: 8px; overflow: hidden;">
@@ -62,7 +62,7 @@ The takeaway here is one you'll read frequently at In *Our* Economy: **We're liv
 
 This analysis uses raw microdata from the 2022 Survey of Consumer Finances (SCF), conducted by the Federal Reserve Board. The SCF is widely considered the gold standard for data on household wealth and financial assets in the United States. The data were analyzed in R using Thomas Lumley's [survey](https://cran.r-project.org/package=survey) and [mitools](https://cran.r-project.org/package=mitools) packages.
 
-"Working households" are households where the SCF reference person is listed as participating in the labor force. A household is counted as unable to afford food and rent if their monthly expenditures for food and housing exceed their total cash savings (checking accounts, savings accounts, and prepaid cards). "Cash savings" here resembles a measure published by the [Harvard Joint Center for Housing Studies](https://www.jchs.harvard.edu/sites/default/files/reports/files/Harvard_JCHS_The_State_of_the_Nations_Housing_2023.pdf), but is modified to include prepaid cards.
+"Working households" are households where the SCF reference person is listed as participating in the labor force. A household is counted as unable to afford food and housing (rent or primary mortgage) if their monthly expenditures for food and housing exceed their total cash savings (checking accounts, savings accounts, and prepaid cards). "Cash savings" here resembles a measure published by the [Harvard Joint Center for Housing Studies](https://www.jchs.harvard.edu/sites/default/files/reports/files/Harvard_JCHS_The_State_of_the_Nations_Housing_2023.pdf), but is modified to include prepaid cards.
 
 Race and ethnicity are based on self-identification by the household's primary respondent. "Latino" includes households of any race who identify as Hispanic or Latino. "Other" includes households not identifying as white, Black, or Latino.
 
@@ -123,7 +123,7 @@ Those interested in confidence intervals can see the full estimates below.
       .filter(Boolean);
 
     let html = `<table class="ci-table">
-    <caption>Share of Working Households Unable to Cover One Month of Food and Rent (with 95% Confidence Intervals)</caption>
+    <caption>Share of Working Households Unable to Cover One Month of Food and Housing (with 95% Confidence Intervals)</caption>
     <thead>
       <tr>
         <th>Group</th>
