@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Working Families Can't Afford Food and Rent</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff;
+      color: #1a1a2e;
+      padding: 1.5rem 1rem 1rem;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    .overall-title {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+      color: #1a1a2e;
+    }
+    .overall-subtitle {
+      text-align: center;
+      font-size: 0.88rem;
+      color: #555;
+      margin-bottom: 1.8rem;
+    }
+    #chart-container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .note {
+      font-size: 0.72rem;
+      color: #888;
+      margin-top: 1rem;
+      text-align: center;
+      line-height: 1.5;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* Observable Plot overrides */
+    [aria-label="y-axis tick label"] { font-size: 11px; }
+    [aria-label="x-axis tick label"] { font-size: 12px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="overall-title">Most Working Families Can't Afford a Month Without a Paycheck</div>
+<div class="overall-subtitle">Share of working households whose cash savings can't cover one month of food and rent</div>
+
+<div id="chart-container"></div>
+
+<div class="note">
+  Cyrus O'Brien's analysis of 2022 Survey of Consumer Finances microdata.<br>
+  A household is counted if monthly food and housing costs exceed total cash savings.
+</div>
+
+<script>
+const BAR_COLOR = "#f16122";
+const RULE_COLOR = "black";
+
+d3.csv("/assets/data/working_families_cant_afford_food_and_rent.csv").then(raw => {
+  const allRow = raw.find(d => d.group.trim() === "All Working Households");
+  const barRows = raw
+    .filter(d => d.group.trim() !== "All Working Households")
+    .map(d => ({ group: d.group.trim(), pct: +d.results }))
+    .sort((a, b) => a.pct - b.pct);
+
+  const allPct = +allRow.results;
+  const domainOrder = barRows.map(d => d.group);
+
+  const pctFormat = d3.format(".0%");
+
+  const bodyPad = 32;
+  const chartWidth = Math.min(680, Math.max(320, window.innerWidth - bodyPad));
+
+  const chartHeight = Math.min(520, Math.floor(window.innerHeight * 0.75));
+
+  const chart = Plot.plot({
+    width: chartWidth,
+    height: chartHeight,
+    marginLeft: 20,
+    marginRight: 20,
+    marginBottom: 50,
+    marginTop: 30,
+    grid: false,
+    x: {
+      domain: domainOrder,
+      tickSize: 0,
+      label: null
+    },
+    y: {
+      label: null,
+      axis: null
+    },
+
+    marks: [
+      Plot.axisX({ label: null, tickSize: 0, marginBottom: 40 }),
+      Plot.barY(barRows, {
+        x: "group",
+        y: "pct",
+        fill: BAR_COLOR,
+        rx: 2
+      }),
+      // Value labels above each bar
+      Plot.text(barRows, {
+        x: "group",
+        y: "pct",
+        text: d => pctFormat(d.pct),
+        dy: -10,
+        fontSize: 13,
+        fontWeight: "bold",
+        fill: "#333"
+      }),
+      // Dotted rule for "All Working Households"
+      Plot.ruleY([allPct], {
+        stroke: RULE_COLOR,
+        strokeWidth: 2,
+        strokeDasharray: "6,4"
+      }),
+      // Label for the rule — placed above it near the right side
+      Plot.text([{ group: domainOrder[domainOrder.length - 1], pct: allPct }], {
+        x: "group",
+        y: "pct",
+        text: () => `All working households: ${pctFormat(allPct)}`,
+        dx: -4,
+        dy: -10,
+        fontSize: 11,
+        fill: RULE_COLOR,
+        fontWeight: "600",
+        textAnchor: "end"
+      })
+    ]
+  });
+
+  document.getElementById("chart-container").appendChild(chart);
+
+  requestAnimationFrame(() => {
+    sendHeight();
+    setTimeout(sendHeight, 300);
+    setTimeout(sendHeight, 800);
+    setTimeout(sendHeight, 2000);
+  });
+});
+
+let _sendHeightTimer;
+function sendHeight() {
+  clearTimeout(_sendHeightTimer);
+  _sendHeightTimer = setTimeout(() => {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ iframeHeight: h }, '*');
+  }, 50);
+}
+
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1500);
+
+const _ro = new ResizeObserver(sendHeight);
+_ro.observe(document.body);
+</script>
+</body>
+</html>
