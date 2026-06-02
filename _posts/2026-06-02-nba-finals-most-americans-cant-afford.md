@@ -13,9 +13,9 @@ The NBA Finals are one of the most-watched sporting events in America — but fo
 
 * **71% of U.S. households** can't afford nosebleed seats at the 2026 NBA Finals.
 * In 1994, only **24% of U.S. households** were priced out of the same seats.
-* That's nearly a **tripling** of unaffordability in three decades.
+* That's nearly a **tripling** of unaffordabilty in three decades.
 
-The chart below shows how sharply the inaffordabilty of nosebleed seats has increased since 1994.
+The chart below shows how sharply the unaffordabilty of nosebleed seats has increased since 1994.
 
 <style>
   #nba-overall-iframe { min-height: 520px; }
