@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Finals Ticket Affordability by Race</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff;
+      color: #1a1a2e;
+      padding: 1.5rem 1rem 1rem;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    .overall-title {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+      color: #1a1a2e;
+    }
+    .overall-subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 1.8rem;
+    }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2rem 1.5rem;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    @media (max-width: 620px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+        max-width: 360px;
+      }
+    }
+    .chart-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .chart-cell h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      text-align: center;
+      color: #1a1a2e;
+    }
+    .legend-row {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
+      color: #333;
+    }
+    .legend-row span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-row .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .note {
+      font-size: 0.72rem;
+      color: #888;
+      margin-top: 1rem;
+      text-align: center;
+      line-height: 1.5;
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    [aria-label="y-axis tick label"] { font-size: 11px; }
+    [aria-label="x-axis tick label"] { font-size: 10px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<div class="overall-title">NBA Finals Ticket Unaffordability by Race</div>
+<div class="overall-subtitle">% of U.S. households that cannot afford nosebleed seats, 1994 vs. 2026</div>
+
+<div class="charts-grid" id="charts-grid"></div>
+
+<div class="legend-row">
+  <span><span class="swatch" style="background:#4A90A4;"></span> 1994</span>
+  <span><span class="swatch" style="background:#D4574E;"></span> 2026</span>
+</div>
+<div class="note">
+  Based on Cyrus O'Brien's analysis of Survey of Consumer Finances microdata.<br>
+  "Unaffordable" = ticket cost for family exceeds the value of household's checking account.
+</div>
+
+<script>
+const RACE_ORDER = ["White", "Black", "Latino"];
+
+d3.csv("/assets/data/nba-finals-affordability-by-race.csv").then(raw => {
+  const data = raw.map(d => ({
+    results: +d.results * 100,
+    se:      +d.se,
+    lower:   +d["(lower"] * 100,
+    upper:   +d["upper)"] * 100,
+    year:    +d.year === 1994 ? "1994" : "2026",
+    race:    d.race.trim()
+  }));
+
+  const grid = document.getElementById('charts-grid');
+
+  const numCols = window.innerWidth <= 620 ? 1 : 3;
+  const bodyPad = 32;
+  const gridGap = numCols > 1 ? 48 : 0;
+  const chartWidth = Math.max(180, Math.floor((Math.min(760, window.innerWidth - bodyPad) - gridGap) / numCols));
+
+  RACE_ORDER.forEach(race => {
+    const subset = data.filter(d => d.race === race);
+
+    const cell = document.createElement('div');
+    cell.className = 'chart-cell';
+    cell.innerHTML = `<h3>${race}</h3>`;
+
+    const chart = Plot.plot({
+      width: chartWidth,
+      height: 250,
+      marginLeft: 50,
+      marginBottom: 30,
+      marginTop: 20,
+      x: {
+        type: "band",
+        domain: ["1994", "2026"],
+        label: null,
+        padding: 0.35
+      },
+      y: {
+        domain: [0, 100],
+        label: "% cannot afford",
+        grid: true,
+        ticks: 5,
+        tickFormat: d => d + "%"
+      },
+      marks: [
+        Plot.barY(subset, {
+          x: "year",
+          y: "results",
+          fill: d => d.year === "1994" ? "#4A90A4" : "#D4574E",
+          rx: 3,
+          tip: true
+        }),
+        Plot.text(subset, {
+          x: "year",
+          y: "upper",
+          text: d => d.results.toFixed(0) + "%",
+          dy: -10,
+          fontSize: 11,
+          fontWeight: "bold",
+          fill: d => d.year === "1994" ? "#4A90A4" : "#D4574E"
+        }),
+        Plot.ruleY([0])
+      ]
+    });
+
+    cell.appendChild(chart);
+    grid.appendChild(cell);
+  });
+
+  requestAnimationFrame(() => {
+    sendHeight();
+    setTimeout(sendHeight, 300);
+    setTimeout(sendHeight, 800);
+    setTimeout(sendHeight, 2000);
+    setTimeout(sendHeight, 4000);
+  });
+});
+
+let _sendHeightTimer;
+function sendHeight() {
+  clearTimeout(_sendHeightTimer);
+  _sendHeightTimer = setTimeout(() => {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ iframeHeight: h }, '*');
+  }, 50);
+}
+
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1500);
+
+const _ro = new ResizeObserver(sendHeight);
+_ro.observe(document.body);
+const _grid = document.getElementById('charts-grid');
+if (_grid) _ro.observe(_grid);
+</script>
+</body>
+</html>
