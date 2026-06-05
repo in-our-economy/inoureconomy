@@ -169,8 +169,9 @@
         missEl.style.color = '#f06050';
       }
 
-      // Tell parent iframe to resize
-      window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+      // Tell parent iframe to resize — wait for reflow first
+      requestAnimationFrame(() => sendHeight());
+      setTimeout(sendHeight, 150);
     }
 
     function resetGame() {
@@ -178,9 +179,13 @@
       dot.setAttribute('opacity', '0');
       marker.setAttribute('opacity', '0');
       banner.style.display = 'none';
-      window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+      requestAnimationFrame(() => sendHeight());
     }
     window.resetGame = resetGame;
+
+    function sendHeight() {
+      window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+    }
 
     svg.addEventListener('click', handleClick);
     svg.addEventListener('touchend', function(e) {
@@ -189,7 +194,7 @@
     });
 
     window.addEventListener('load', function() {
-      window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+      sendHeight();
     });
   })();
   </script>

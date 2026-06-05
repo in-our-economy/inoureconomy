@@ -22,7 +22,7 @@ Below is a number line, with $0 at the left-hand side and $1 billion on the righ
     src="{{ '/assets/html/how-much-is-1-billion.html' | relative_url }}"
     scrolling="no"
     title="Where is 1 million on a number line from 0 to 1 billion?"
-    style="width: 100%; border: none; min-height: 220px;">
+    style="width: 100%; border: none; min-height: 420px;">
   </iframe>
 </div>
 
@@ -30,7 +30,7 @@ Below is a number line, with $0 at the left-hand side and $1 billion on the righ
   window.addEventListener('message', function(e) {
     if (e.data && e.data.iframeHeight) {
       var el = document.getElementById('billion-iframe');
-      if (el) el.style.height = Math.max(220, e.data.iframeHeight) + 'px';
+      if (el) el.style.height = Math.max(420, e.data.iframeHeight) + 'px';
     }
   });
 </script>
