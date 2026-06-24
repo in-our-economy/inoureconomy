@@ -3,7 +3,7 @@ layout: post
 title:  "Black and Latino Families are Largely Shut Out of the World Cup"
 subtitle: "Black and Latino families face steeper barriers to attending the 2026 World Cup"
 date: 2026-05-20,
-Categories: [Inequality, New Analyses]
+categories: [Inequality, New Analyses]
 tags: [inequality, visualization, affordability, race, new analyses]
 author: "Cyrus O'Brien"
 ---

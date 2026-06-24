@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wealth bubbles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { height: 100%; }
+
+  body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: transparent;
+    color: #1a1d2e;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1.75rem 1.25rem;
+  }
+
+  /* ── Input section ─────────────────────────────────── */
+
+  .prompt {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  #preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  .pb {
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid #e5e7ef;
+    background: transparent;
+    color: #1a1d2e;
+    cursor: pointer;
+    transition: all 150ms;
+  }
+  .pb:hover  { background: #f6f7fb; }
+  .pb.active { background: #5b6af0; color: #fff; border-color: #5b6af0; }
+
+  #custom-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+  #custom-row label { font-size: 13px; color: #6b7280; white-space: nowrap; }
+
+  #ci {
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid #e5e7ef;
+    background: #fff;
+    color: #1a1d2e;
+    width: 160px;
+    outline: none;
+  }
+  #ci:focus { border-color: #5b6af0; box-shadow: 0 0 0 3px rgba(91,106,240,0.15); }
+
+  #go-btn {
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    padding: 6px 18px;
+    border-radius: 999px;
+    border: none;
+    background: #5b6af0;
+    color: #fff;
+    cursor: pointer;
+    transition: background 150ms;
+  }
+  #go-btn:hover { background: #4455dd; }
+
+  /* ── Stage ─────────────────────────────────────────── */
+
+  #stage {
+    flex: 1 1 auto;
+    min-height: 200px;
+    border-radius: 12px;
+    border: 1px solid #e5e7ef;
+    overflow: hidden;
+    background: #f6f7fb;
+    position: relative;
+  }
+  #stage svg { width: 100%; height: 100%; display: block; }
+
+  /* Fullscreen button — top-right of the whole widget */
+  #fs-btn {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.75rem;
+    z-index: 10;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid #e5e7ef;
+    background: rgba(255,255,255,0.85);
+    color: #6b7280;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms;
+  }
+  #fs-btn:hover { background: #fff; color: #1a1d2e; border-color: #5b6af0; }
+
+  /* Fullscreen overrides — entire body goes fullscreen */
+  body:fullscreen,
+  body:-webkit-full-screen {
+    background: #ffffff !important;
+    padding: 2rem 2.5rem;
+  }
+  body:fullscreen #stage,
+  body:-webkit-full-screen #stage {
+    border-radius: 0;
+    border: none;
+  }
+  /* Kill the black backdrop browsers paint behind the fullscreen element */
+  body::backdrop {
+    background: #ffffff;
+  }
+
+  /* ── SVG animations ────────────────────────────────── */
+
+  #world, .bgrp { will-change: transform; }
+
+  #world { transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+  .bgrp  { transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+  .bgrp-inner {
+    transform: scale(0);
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  .bgrp-inner.pop {
+    transform: scale(1);
+    transition: transform 1.5s cubic-bezier(0.34, 1.08, 0.64, 1);
+  }
+
+  /* ── Bottom controls ───────────────────────────────── */
+
+  #note {
+    font-size: 12px;
+    color: #9ca3af;
+    text-align: center;
+    margin-top: 8px;
+    min-height: 18px;
+  }
+
+  #add-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1rem;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  #add-section.visible { opacity: 1; pointer-events: auto; }
+
+  .add-label { font-size: 13px; color: #6b7280; white-space: nowrap; }
+
+  .add-btn {
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid #e5e7ef;
+    background: #fff;
+    color: #1a1d2e;
+    cursor: pointer;
+    transition: all 150ms;
+  }
+  .add-btn:hover:not(:disabled) { background: #f6f7fb; border-color: #5b6af0; color: #5b6af0; }
+  .add-btn.added { background: #5b6af0; color: #fff; border-color: #5b6af0; cursor: default; }
+  .add-btn:disabled { opacity: 0.45; cursor: default; }
+
+  #clear-btn {
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid #e5e7ef;
+    background: #fff;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 150ms;
+    margin-left: auto;
+  }
+  #clear-btn:hover { background: #f6f7fb; border-color: #9ca3af; color: #1a1d2e; }
+</style>
+</head>
+<body>
+
+<p class="prompt">Enter a value significant to you &ndash; it could be your idea of wealth or financial security, how much you have saved, or how much debt you have.</p>
+
+<div id="preset-row">
+  <button class="pb" data-val="50000">$50k</button>
+  <button class="pb" data-val="100000">$100k</button>
+  <button class="pb" data-val="500000">$500k</button>
+  <button class="pb" data-val="1000000">$1M</button>
+  <button class="pb" data-val="5000000">$5M</button>
+  <button class="pb" data-val="10000000">$10M</button>
+  <button class="pb" data-val="25000000">$25M</button>
+</div>
+
+<div id="custom-row">
+  <label for="ci">Or enter your own:</label>
+  <input id="ci" type="text" placeholder="e.g. 250,000" inputmode="numeric" />
+  <button id="go-btn">Compare &rarr;</button>
+</div>
+
+<button id="fs-btn" title="Fullscreen">&#x26F6;</button>
+
+<div id="stage">
+  <svg id="bsvg" xmlns="http://www.w3.org/2000/svg">
+    <g id="world"></g>
+    <g id="annotations"></g>
+  </svg>
+</div>
+
+<p id="note"></p>
+
+<div id="add-section">
+  <button id="clear-btn">&#x21ba; Start over</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+
+  const DEFS = {
+    you:    { label: 'You',        fill: '#5b6af0', tc: '#ffffff',  sc: 'rgba(255,255,255,0.72)' },
+    billion:{ label: '$1 Billion', sub: '$1B',   fill: '#1A6B5A', tc: '#DFFAF2', sc: '#4CC9A0', val: 1e9  },
+    musk:   { label: 'Elon Musk',  sub: '$957B', fill: '#993C1D', tc: '#FAECE7', sc: '#F0997B', val: 957e9 },
+  };
+
+  const R_REF        = 100;
+  const GAP          = 30;
+  const MIN_VIS_PX   = 0.5;   // minimum bubble radius in pixels
+  const MIN_LABEL_PX = 20;
+  const DUR_RESIZE   = 1500;  // ms — canvas zoom
+  const DUR_POP      = 1500;  // ms — bubble appear
+
+  // ── State ───────────────────────────────────────────────────────────────────
+
+  let userVal   = null;
+  let bubbles   = [];
+  let started   = false;
+  let busy      = false;
+  let animToken = 0;   // only start() increments this
+  let muskAdded = false;
+
+  // ── DOM refs ────────────────────────────────────────────────────────────────
+
+  const stageEl  = document.getElementById('stage');
+  const worldEl  = document.getElementById('world');
+  const annotEl  = document.getElementById('annotations');
+  const noteEl   = document.getElementById('note');
+  const addEl    = document.getElementById('add-section');
+  const clearBtn = document.getElementById('clear-btn');
+  const ciEl     = document.getElementById('ci');
+  const goBtn    = document.getElementById('go-btn');
+  const fsBtn    = document.getElementById('fs-btn');
+
+  // ── Transition-end helper (with fallback timeout) ───────────────────────────
+
+  function onTransEnd(el, durMs, cb) {
+    let done = false;
+    function finish() {
+      if (done) return;
+      done = true;
+      el.removeEventListener('transitionend', handler);
+      clearTimeout(tid);
+      cb();
+    }
+    function handler(e) {
+      if (e.target === el && e.propertyName === 'transform') finish();
+    }
+    el.addEventListener('transitionend', handler);
+    const tid = setTimeout(finish, durMs + 200);
+  }
+
+  // ── Formatters ──────────────────────────────────────────────────────────────
+
+  function fmt(v) {
+    if (v >= 1e12) return '$' + (v / 1e12).toFixed(1).replace(/\.0$/, '') + 'T';
+    if (v >= 1e9)  return '$' + (v / 1e9 ).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (v >= 1e6)  return '$' + (v / 1e6 ).toFixed(2).replace(/\.?0+$/, '') + 'M';
+    if (v >= 1e3)  return '$' + Math.round(v / 1e3) + 'k';
+    return '$' + Math.round(v);
+  }
+
+  // ── Layout ──────────────────────────────────────────────────────────────────
+
+  function naturalR(key) {
+    const val = key === 'you' ? userVal : DEFS[key].val;
+    return R_REF * Math.sqrt(val / Math.max(1, userVal));
+  }
+
+  function packPositions() {
+    let cursor = 0;
+    bubbles.forEach((b, i) => {
+      b.worldX = i === 0 ? 0 : cursor + GAP + b.worldR;
+      cursor   = b.worldX + b.worldR;
+    });
+  }
+
+  function worldToScreen() {
+    if (bubbles.length === 0) return { s: 1, tx: 0, ty: 0 };
+    const W = stageEl.clientWidth  || 700;
+    const H = stageEl.clientHeight || 380;
+    const left  = bubbles[0].worldX - bubbles[0].worldR;
+    const right = bubbles[bubbles.length - 1].worldX + bubbles[bubbles.length - 1].worldR;
+    const maxR  = Math.max(...bubbles.map(b => b.worldR));
+    const s  = Math.min(W * 0.88 / Math.max(1, right - left), H * 0.88 / Math.max(1, 2 * maxR));
+    const tx = W / 2 - (left + right) / 2 * s;
+    const ty = H / 2;
+    return { s, tx, ty };
+  }
+
+  function computeLayout() {
+    bubbles.forEach(b => { b.worldR = naturalR(b.key); });
+    packPositions();
+    return worldToScreen();
+  }
+
+  // ── Transform application ───────────────────────────────────────────────────
+
+  function applyWorld({ s, tx, ty }, ms) {
+    worldEl.style.transition = ms > 0
+      ? `transform ${ms}ms cubic-bezier(0.4,0,0.2,1)` : 'none';
+    worldEl.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+  }
+
+  function applyPositions(ms, skipKey) {
+    bubbles.forEach(b => {
+      const d = ms > 0 && b.key !== skipKey ? `${ms}ms` : '0ms';
+      b.grp.style.transition = `transform ${d} cubic-bezier(0.4,0,0.2,1)`;
+      b.grp.style.transform  = `translate(${b.worldX}px,0px)`;
+    });
+  }
+
+  // ── Post-transition geometry ────────────────────────────────────────────────
+
+  function updateGeometry(b, s) {
+    b.circle.setAttribute('r', b.worldR);
+    const vr = b.worldR * s;
+
+    if (vr < MIN_LABEL_PX) {
+      b.t1.setAttribute('opacity', '0');
+      if (b.t2) b.t2.setAttribute('opacity', '0');
+      return;
+    }
+
+    const cfs1 = Math.min(28, Math.max(10, vr * 0.32));
+    const cfs2 = Math.min(18, Math.max(8,  vr * 0.22));
+    const wfs1 = cfs1 / s;
+    const wfs2 = cfs2 / s;
+    const showSub = b.t2 && vr > 50;
+
+    b.t1.setAttribute('font-size', wfs1.toFixed(3));
+    b.t1.setAttribute('y', showSub ? (-(wfs1 * 0.55)).toFixed(3) : '0');
+    b.t1.setAttribute('opacity', '1');
+
+    if (b.t2) {
+      if (showSub) {
+        b.t2.setAttribute('font-size', wfs2.toFixed(3));
+        b.t2.setAttribute('y', (wfs1 * 0.55 + wfs2 * 0.7).toFixed(3));
+        if (b.key === 'you') b.t2.textContent = fmt(userVal);
+        b.t2.setAttribute('opacity', '1');
+      } else {
+        b.t2.setAttribute('opacity', '0');
+      }
+    }
+  }
+
+  // ── Callout annotations for tiny bubbles (to the LEFT) ─────────────────────
+
+  function drawAnnotations({ s, tx, ty }) {
+    annotEl.replaceChildren();
+
+    let calloutIdx = 0;
+    bubbles.forEach(b => {
+      const vr = b.worldR * s;
+      if (vr >= MIN_LABEL_PX) return;
+
+      const def = DEFS[b.key];
+      const cx  = tx + b.worldX * s;
+      const cy  = ty;
+      const er  = Math.max(vr, 1.5);
+
+      const lx = Math.max(80, cx - er - 28);
+      const ly = Math.max(20, cy - 44 - calloutIdx * 26);
+      calloutIdx++;
+
+      const angle = Math.atan2(cy - ly, cx - lx);
+      const ex = cx - er * Math.cos(angle);
+      const ey = cy - er * Math.sin(angle);
+      const qx = (lx + ex) / 2 - 10;
+      const qy = Math.min(ey, ly) - 14;
+
+      const path = document.createElementNS(NS, 'path');
+      path.setAttribute('d',
+        `M${lx.toFixed(1)},${(ly + 6).toFixed(1)} ` +
+        `Q${qx.toFixed(1)},${qy.toFixed(1)} ` +
+        `${ex.toFixed(1)},${ey.toFixed(1)}`);
+      path.setAttribute('stroke', def.fill);
+      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('opacity', '0.7');
+      annotEl.appendChild(path);
+
+      const headLen = 5;
+      const ha = Math.atan2(ey - qy, ex - qx);
+      const arrowPts = [
+        `${ex.toFixed(1)},${ey.toFixed(1)}`,
+        `${(ex - headLen * Math.cos(ha - 0.4)).toFixed(1)},${(ey - headLen * Math.sin(ha - 0.4)).toFixed(1)}`,
+        `${(ex - headLen * Math.cos(ha + 0.4)).toFixed(1)},${(ey - headLen * Math.sin(ha + 0.4)).toFixed(1)}`,
+      ].join(' ');
+      const head = document.createElementNS(NS, 'polygon');
+      head.setAttribute('points', arrowPts);
+      head.setAttribute('fill', def.fill);
+      head.setAttribute('opacity', '0.7');
+      annotEl.appendChild(head);
+
+      const label = b.key === 'you'
+        ? `You (${fmt(userVal)})`
+        : `${def.label}${def.sub ? ' (' + def.sub + ')' : ''}`;
+
+      const text = document.createElementNS(NS, 'text');
+      text.setAttribute('x', (lx - 4).toFixed(1));
+      text.setAttribute('y', (ly + 4).toFixed(1));
+      text.setAttribute('text-anchor', 'end');
+      text.setAttribute('font-family', 'Inter, sans-serif');
+      text.setAttribute('font-size', '12');
+      text.setAttribute('font-weight', '600');
+      text.setAttribute('fill', def.fill);
+      text.textContent = label;
+      annotEl.appendChild(text);
+    });
+  }
+
+  function afterAnim(layout) {
+    bubbles.forEach(b => updateGeometry(b, layout.s));
+    drawAnnotations(layout);
+  }
+
+  // ── Bubble DOM creation ─────────────────────────────────────────────────────
+
+  function makeBubble(key) {
+    const def     = DEFS[key];
+    const subText = key === 'you' ? fmt(userVal) : (def.sub || null);
+
+    const grp   = document.createElementNS(NS, 'g');
+    const inner = document.createElementNS(NS, 'g');
+    grp.classList.add('bgrp');
+    inner.classList.add('bgrp-inner');
+
+    const circle = document.createElementNS(NS, 'circle');
+    circle.setAttribute('cx', 0);
+    circle.setAttribute('cy', 0);
+    circle.setAttribute('r', 0);
+    circle.setAttribute('fill', def.fill);
+    inner.appendChild(circle);
+
+    const t1 = document.createElementNS(NS, 'text');
+    t1.setAttribute('x', 0);
+    t1.setAttribute('y', 0);
+    t1.setAttribute('text-anchor', 'middle');
+    t1.setAttribute('dominant-baseline', 'middle');
+    t1.setAttribute('font-family', 'Inter, sans-serif');
+    t1.setAttribute('font-weight', '600');
+    t1.setAttribute('font-size', '14');
+    t1.setAttribute('fill', def.tc);
+    t1.setAttribute('pointer-events', 'none');
+    t1.setAttribute('opacity', '0');
+    t1.textContent = key === 'you' ? 'You' : def.label;
+    inner.appendChild(t1);
+
+    let t2 = null;
+    if (subText) {
+      t2 = document.createElementNS(NS, 'text');
+      t2.setAttribute('x', 0);
+      t2.setAttribute('y', '18');
+      t2.setAttribute('text-anchor', 'middle');
+      t2.setAttribute('dominant-baseline', 'middle');
+      t2.setAttribute('font-family', 'Inter, sans-serif');
+      t2.setAttribute('font-size', '10');
+      t2.setAttribute('fill', def.sc);
+      t2.setAttribute('pointer-events', 'none');
+      t2.setAttribute('opacity', '0');
+      t2.textContent = subText;
+      inner.appendChild(t2);
+    }
+
+    grp.appendChild(inner);
+    worldEl.appendChild(grp);
+
+    return { key, worldR: 0, worldX: 0, grp, inner, circle, t1, t2 };
+  }
+
+  // ── Add a bubble: resize FIRST, then pop ────────────────────────────────────
+
+  function addBubble(key, animate, tok, cb) {
+    const b = makeBubble(key);
+    bubbles.push(b);
+
+    const layout = computeLayout();
+
+    b.circle.setAttribute('r', b.worldR);
+    b.grp.style.transition = 'none';
+    b.grp.style.transform  = `translate(${b.worldX}px,0px)`;
+
+    if (animate) {
+      // Clear stale annotations immediately — they're in screen-space
+      // and will point at wrong positions during the resize.
+      annotEl.replaceChildren();
+
+      // Update existing bubble geometry (text sizes, radii) for the NEW
+      // scale immediately so they look correct throughout the zoom transition.
+      bubbles.forEach(bb => { if (bb !== b) updateGeometry(bb, layout.s); });
+
+      // Phase 1: resize canvas (new bubble stays hidden at scale(0))
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (tok !== animToken) return;
+        applyWorld(layout, DUR_RESIZE);
+        applyPositions(DUR_RESIZE, key);
+      }));
+
+      // Phase 2: after resize finishes, draw annotations & pop
+      onTransEnd(worldEl, DUR_RESIZE, () => {
+        if (tok !== animToken) return;
+
+        drawAnnotations(layout);
+
+        b.inner.classList.add('pop');
+
+        // Phase 3: after pop finishes, final geometry pass
+        onTransEnd(b.inner, DUR_POP, () => {
+          if (tok !== animToken) return;
+          afterAnim(layout);
+          if (cb) cb(layout);
+        });
+      });
+    } else {
+      // Instant
+      b.inner.style.transition = 'none';
+      b.inner.classList.add('pop');
+      applyWorld(layout, 0);
+      applyPositions(0, key);
+      requestAnimationFrame(() => {
+        if (tok !== animToken) return;
+        afterAnim(layout);
+        if (cb) cb(layout);
+      });
+    }
+  }
+
+  // ── Note ────────────────────────────────────────────────────────────────────
+
+  function updateNote() {
+    const hasMusk = bubbles.some(b => b.key === 'musk');
+    noteEl.textContent = hasMusk
+      ? 'Musk\'s wealth is ' + Math.round(DEFS.musk.val / Math.max(1, userVal)).toLocaleString() + '× yours'
+      : '';
+  }
+
+  // ── Start ───────────────────────────────────────────────────────────────────
+
+  function start() {
+    if (userVal === null || userVal <= 0) return;
+
+    // Cancel any in-flight animation sequence
+    const tok = ++animToken;
+
+    // Clear canvas
+    worldEl.replaceChildren();
+    annotEl.replaceChildren();
+    bubbles = [];
+    started = false;
+    busy    = true;
+    muskAdded = false;
+    noteEl.textContent = '';
+    addEl.classList.remove('visible');
+
+    // Step 1: "You" bubble — instant
+    addBubble('you', false, tok, () => {
+      if (tok !== animToken) return;
+      started = true;
+
+      // Step 2: $1B bubble — resize then pop
+      setTimeout(() => {
+        if (tok !== animToken) return;
+        addBubble('billion', true, tok, () => {
+          if (tok !== animToken) return;
+          addEl.classList.add('visible');
+          busy = false;
+          updateNote();
+          notifyParent();
+
+          // Auto-add Musk 3 s after the $1B bubble reaches full size
+          setTimeout(() => {
+            if (tok !== animToken) return;
+            addMusk();
+          }, 3000);
+        });
+      }, 500);
+    });
+  }
+
+  // ── Clear ───────────────────────────────────────────────────────────────────
+
+  function clear() {
+    ++animToken;  // cancel in-flight
+    worldEl.replaceChildren();
+    annotEl.replaceChildren();
+    bubbles = [];
+    started = false;
+    busy    = false;
+    muskAdded = false;
+    userVal = null;
+    noteEl.textContent = '';
+    addEl.classList.remove('visible');
+
+    // Reset UI controls
+    document.querySelectorAll('.pb').forEach(b => b.classList.remove('active'));
+    ciEl.value = '';
+    notifyParent();
+  }
+
+  // ── Responsive: resize handler ──────────────────────────────────────────────
+
+  let resizeRAF = null;
+  const resizeObs = new ResizeObserver(() => {
+    if (resizeRAF) cancelAnimationFrame(resizeRAF);
+    resizeRAF = requestAnimationFrame(() => {
+      if (bubbles.length === 0 || busy) return;
+      const layout = computeLayout();
+      applyWorld(layout, 0);
+      applyPositions(0, null);
+      afterAnim(layout);
+    });
+  });
+  resizeObs.observe(stageEl);
+
+  // ── Responsive: notify parent iframe of height ──────────────────────────────
+
+  function notifyParent() {
+    try {
+      window.parent.postMessage({ iframeHeight: document.documentElement.scrollHeight }, '*');
+    } catch (e) { /* not in iframe */ }
+  }
+
+  // ── Fullscreen toggle ───────────────────────────────────────────────────────
+
+  let preFullscreenHeight = null;
+
+  fsBtn.addEventListener('click', () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      preFullscreenHeight = document.documentElement.scrollHeight;
+      document.body.requestFullscreen().catch(() => {});
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    fsBtn.textContent = document.fullscreenElement ? '\u2716' : '\u26F6';
+    // Redraw after fullscreen change settles
+    setTimeout(() => {
+      if (bubbles.length === 0) return;
+      const layout = computeLayout();
+      applyWorld(layout, 0);
+      applyPositions(0, null);
+      afterAnim(layout);
+      if (!document.fullscreenElement && preFullscreenHeight !== null) {
+        try {
+          window.parent.postMessage({ iframeHeight: preFullscreenHeight }, '*');
+        } catch (e) {}
+        preFullscreenHeight = null;
+      }
+    }, 100);
+  });
+
+  // ── Events ──────────────────────────────────────────────────────────────────
+
+  // "Compare →" button — always starts fresh
+  goBtn.addEventListener('click', () => {
+    const raw = ciEl.value.replace(/[^0-9.]/g, '');
+    const v   = parseFloat(raw);
+    if (v > 0) {
+      userVal = v;
+      document.querySelectorAll('.pb').forEach(b => b.classList.remove('active'));
+    }
+    start();
+  });
+
+  ciEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') goBtn.click();
+  });
+
+  // Format with commas as the user types
+  ciEl.addEventListener('input', () => {
+    const raw = ciEl.value.replace(/[^0-9]/g, '');
+    if (raw) {
+      const pos = ciEl.selectionStart;
+      const oldLen = ciEl.value.length;
+      ciEl.value = Number(raw).toLocaleString();
+      // Keep cursor in roughly the right spot
+      const newLen = ciEl.value.length;
+      ciEl.setSelectionRange(pos + newLen - oldLen, pos + newLen - oldLen);
+    }
+  });
+
+  // Preset clicks — always start fresh
+  document.querySelectorAll('.pb').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.pb').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      ciEl.value = '';
+      userVal = Number(btn.dataset.val);
+      start();
+    });
+  });
+
+  // Musk — one-way auto-add
+  function addMusk() {
+    if (busy || !started || muskAdded) return;
+    busy = true;
+    muskAdded = true;
+    const tok = animToken;
+    addBubble('musk', true, tok, () => {
+      if (tok !== animToken) return;
+      busy = false;
+      updateNote();
+      notifyParent();
+    });
+  }
+
+  // Clear — reset everything
+  clearBtn.addEventListener('click', clear);
+
+  // ── Boot ────────────────────────────────────────────────────────────────────
+
+  notifyParent();
+
+})();
+</script>
+</body>
+</html>
