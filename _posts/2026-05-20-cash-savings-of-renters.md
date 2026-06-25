@@ -20,6 +20,7 @@ These numbers come from my analysis of the Survey of Consumer Finances and were 
 
 The chart below lets you explore the distribution of cash savings and net worth among renters compared to all households. You can zoom in on different parts of the distribution to see just how thin the financial margins are.
 
+### Cash savings and net worth of apartment renters vs homeowners, by percentile
 <style>
   /* Style the Observable form inputs to match the site */
   #observablehq-viewof-form-f629b048 form,
@@ -89,7 +90,6 @@ The chart below lets you explore the distribution of cash savings and net worth 
   import {Runtime, Inspector} from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@5/dist/runtime.js";
   import define from "https://api.observablehq.com/d/cb245a31ca3ab573.js?v=4";
   new Runtime().module(define, name => {
-    if (name === "title_renters_by_race") return new Inspector(document.querySelector("#observablehq-title_renters_by_race-f629b048"));
     if (name === "viewof form") return new Inspector(document.querySelector("#observablehq-viewof-form-f629b048"));
     if (name === "cash_savings_chart") return new Inspector(document.querySelector("#observablehq-cash_savings_chart-f629b048"));
     return ["cash_savings_chart_tall","renters_toggle","cash_savings_chart_annotated","cash_savings_chart_for_pdf_not_annotated"].includes(name);
