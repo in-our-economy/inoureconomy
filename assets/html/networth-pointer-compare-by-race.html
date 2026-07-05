@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparing Net Worth Percentiles by Race</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #fff;
+    color: #1a1a2e;
+    padding: 1.5rem 1rem 1rem;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  .overall-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    color: #1a1a2e;
+  }
+  .overall-subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+  .hint {
+    font-size: 0.78rem;
+    color: #777;
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  #chart-container {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .legend-row {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    color: #333;
+  }
+  .legend-row span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .legend-row .swatch {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .note {
+    font-size: 0.72rem;
+    color: #888;
+    margin-top: 1rem;
+    text-align: center;
+    line-height: 1.5;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .axis text { font-size: 11px; fill: #444; }
+  .axis path, .axis line { stroke: #ccc; }
+  .grid line { stroke: #eee; }
+  .grid path { display: none; }
+  .zero-line { stroke: #999; stroke-dasharray: 2,2; }
+  .series-line { fill: none; stroke-width: 2.25px; }
+  .pointer-hline { stroke: #444; stroke-width: 1px; stroke-dasharray: 4,3; pointer-events: none; display: none; }
+  .pointer-dot { pointer-events: none; display: none; stroke: #fff; stroke-width: 1.5px; }
+  .tooltip-box {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(255,255,255,0.98);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.78rem;
+    color: #333;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .tooltip-box .t-value { font-weight: 700; margin-bottom: 0.3rem; color: #1a1a2e; }
+  .tooltip-box .t-row { display: flex; align-items: center; gap: 0.35rem; margin-top: 0.15rem; }
+  .tooltip-box .t-swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="overall-title">Comparing Net Worth Percentiles by Race, 2022</div>
+<div class="overall-subtitle">2022 Survey of Consumer Finances</div>
+<div class="hint">Move your mouse (or finger) over the chart to see what percentile a given net worth represents for each racial group</div>
+
+<div id="chart-container"></div>
+
+<div class="legend-row" id="legend-row"></div>
+
+<div class="note">
+  Based on Cyrus O'Brien's analysis of Survey of Consumer Finances microdata. Net worth values are household-level, 2022 dollars. Y-axis uses a symmetric log scale to show both negative and very large net worth values on one chart.
+</div>
+
+<script>
+const RACE_COLORS = { "White": "#6B4F9E", "Black": "#4A90A4", "Latino": "#E8944A" };
+const RACE_ORDER = ["White", "Black", "Latino"];
+const RACE_LABEL = { "white": "White", "Black": "Black", "Latino": "Latino" };
+
+function formatMoney(v) {
+  const sign = v < 0 ? "-" : "";
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return sign + "$" + (abs / 1e6).toFixed(abs >= 1e7 ? 0 : 1) + "M";
+  if (abs >= 1e3) return sign + "$" + (abs / 1e3).toFixed(abs >= 1e4 ? 0 : 1) + "k";
+  return sign + "$" + abs.toFixed(0);
+}
+
+function ordinal(n) {
+  const s = ["th", "st", "nd", "rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+d3.csv("/assets/data/networth-quantiles-by-race-2022.csv").then(raw => {
+  const data = raw.map(d => ({
+    race: RACE_LABEL[d.race.trim()] || d.race.trim(),
+    percentile: +d.percentile * 100,
+    value: +d.results
+  })).filter(d => RACE_ORDER.includes(d.race));
+
+  const byRace = {};
+  RACE_ORDER.forEach(r => {
+    byRace[r] = data.filter(d => d.race === r).sort((a, b) => a.percentile - b.percentile);
+  });
+
+  // Legend
+  const legend = d3.select("#legend-row");
+  RACE_ORDER.forEach(r => {
+    legend.append("span").html(
+      `<span class="swatch" style="background:${RACE_COLORS[r]};"></span> ${r}`
+    );
+  });
+
+  const container = document.getElementById("chart-container");
+  const margin = { top: 20, right: 24, bottom: 34, left: 64 };
+  const outerWidth = Math.max(300, Math.min(760, window.innerWidth - 32));
+  const outerHeight = 380;
+  const width = outerWidth - margin.left - margin.right;
+  const height = outerHeight - margin.top - margin.bottom;
+
+  const svg = d3.select(container).append("svg")
+    .attr("width", outerWidth)
+    .attr("height", outerHeight);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([1, 99]).range([0, width]);
+
+  const allValues = data.map(d => d.value);
+  const yMin = d3.min(allValues), yMax = d3.max(allValues);
+  const y = d3.scaleSymlog().constant(1000).domain([yMin, yMax]).range([height, 0]).nice();
+
+  g.append("g").attr("class", "axis x-axis").attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x).ticks(8).tickFormat(d => Math.round(d) + "th"));
+
+  const yTickValues = [yMin, -50000, -10000, 0, 10000, 50000, 250000, 1000000, 5000000, yMax]
+    .filter((v, i, arr) => v >= yMin && v <= yMax && arr.indexOf(v) === i)
+    .sort((a, b) => a - b);
+
+  g.append("g").attr("class", "axis y-axis")
+    .call(d3.axisLeft(y).tickValues(yTickValues).tickFormat(formatMoney));
+
+  g.append("g").attr("class", "grid")
+    .call(d3.axisLeft(y).tickValues(yTickValues).tickSize(-width).tickFormat(""))
+    .call(gr => gr.select(".domain").remove());
+
+  g.append("line").attr("class", "zero-line")
+    .attr("x1", 0).attr("x2", width).attr("y1", y(0)).attr("y2", y(0));
+
+  const line = d3.line()
+    .x(d => x(d.percentile))
+    .y(d => y(d.value))
+    .curve(d3.curveMonotoneX);
+
+  RACE_ORDER.forEach(r => {
+    g.append("path")
+      .datum(byRace[r])
+      .attr("class", "series-line")
+      .attr("stroke", RACE_COLORS[r])
+      .attr("d", line);
+  });
+
+  // ---- Pointer interaction: given a Y value, find the matching percentile on each race's curve ----
+  const hLine = g.append("line").attr("class", "pointer-hline").attr("x1", 0).attr("x2", width);
+  const dots = {};
+  RACE_ORDER.forEach(r => {
+    dots[r] = g.append("circle").attr("class", "pointer-dot").attr("r", 5).attr("fill", RACE_COLORS[r]);
+  });
+  const tooltip = d3.select(container).append("div").attr("class", "tooltip-box");
+
+  function percentileForValue(arr, target) {
+    // arr sorted by percentile ascending; values assumed non-decreasing with percentile
+    if (target <= arr[0].value) return { percentile: arr[0].percentile, clamped: "low" };
+    if (target >= arr[arr.length - 1].value) return { percentile: arr[arr.length - 1].percentile, clamped: "high" };
+    for (let i = 0; i < arr.length - 1; i++) {
+      const a = arr[i], b = arr[i + 1];
+      if (target >= a.value && target <= b.value) {
+        const frac = b.value === a.value ? 0 : (target - a.value) / (b.value - a.value);
+        return { percentile: a.percentile + frac * (b.percentile - a.percentile), clamped: null };
+      }
+    }
+    return { percentile: arr[arr.length - 1].percentile, clamped: "high" };
+  }
+
+  function handleMove(event) {
+    const [mx, my] = d3.pointer(event, g.node());
+    if (mx < 0 || mx > width || my < 0 || my > height) { hide(); return; }
+    const targetValue = y.invert(my);
+
+    hLine.attr("y1", my).attr("y2", my).style("display", "block");
+
+    let html = `<div class="t-value">Net worth: ${formatMoney(targetValue)}</div>`;
+    RACE_ORDER.forEach(r => {
+      const res = percentileForValue(byRace[r], targetValue);
+      const px = x(res.percentile);
+      dots[r].attr("cx", px).attr("cy", my).style("display", "block");
+      const label = res.clamped === "low" ? "below 1st percentile"
+        : res.clamped === "high" ? "above 99th percentile"
+        : ordinal(Math.round(res.percentile)) + " percentile";
+      html += `<div class="t-row"><span class="t-swatch" style="background:${RACE_COLORS[r]}"></span>${r}: <strong>${label}</strong></div>`;
+    });
+    tooltip.style("display", "block").html(html);
+
+    const [pageX, pageY] = d3.pointer(event, container);
+    let left = pageX + 16, top = pageY - 20;
+    if (left + 190 > outerWidth) left = pageX - 190;
+    if (top < 0) top = 4;
+    tooltip.style("left", left + "px").style("top", top + "px");
+  }
+
+  function hide() {
+    hLine.style("display", "none");
+    RACE_ORDER.forEach(r => dots[r].style("display", "none"));
+    tooltip.style("display", "none");
+  }
+
+  g.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "none")
+    .attr("pointer-events", "all")
+    .style("cursor", "crosshair")
+    .on("mousemove", handleMove)
+    .on("touchmove", (event) => { event.preventDefault(); handleMove(event.touches[0]); })
+    .on("mouseleave", hide)
+    .on("touchend", hide);
+
+  requestAnimationFrame(() => {
+    sendHeight();
+    setTimeout(sendHeight, 300);
+    setTimeout(sendHeight, 800);
+  });
+});
+
+let _sendHeightTimer;
+function sendHeight() {
+  clearTimeout(_sendHeightTimer);
+  _sendHeightTimer = setTimeout(() => {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ iframeHeight: h }, '*');
+  }, 50);
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1500);
+const _ro = new ResizeObserver(sendHeight);
+_ro.observe(document.body);
+</script>
+</body>
+</html>

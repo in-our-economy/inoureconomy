@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2022 Median Net Worth by Race</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #fff;
+    color: #1a1a2e;
+    padding: 1.5rem 1rem 1rem;
+    line-height: 1.5;
+  }
+  .overall-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    color: #1a1a2e;
+  }
+  .overall-subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1.8rem;
+  }
+  #chart-container {
+    max-width: 380px;
+    margin: 0 auto;
+  }
+  .note {
+    font-size: 0.72rem;
+    color: #888;
+    margin-top: 1rem;
+    text-align: center;
+    line-height: 1.5;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  [aria-label="y-axis tick label"] { font-size: 11px; }
+  [aria-label="x-axis tick label"] { font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="overall-title">Median Net Worth by Race, 2022</div>
+<div class="overall-subtitle">U.S. households, 2022</div>
+
+<div id="chart-container"></div>
+
+<div class="note">
+  Based on Cyrus O'Brien's analysis of 2022 Survey of Consumer Finances microdata. Values are household net worth at the 50th percentile (median) within each racial group.
+</div>
+
+<script>
+const RACE_COLORS = { "White": "#6B4F9E", "Black": "#4A90A4", "Latino": "#E8944A" };
+const RACE_ORDER = ["White", "Black", "Latino"];
+const RACE_LABEL = { "white": "White", "Black": "Black", "Latino": "Latino" };
+
+function formatMoney(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return "$" + (abs / 1e6).toFixed(abs >= 1e7 ? 0 : 1) + "M";
+  if (abs >= 1e3) return "$" + (abs / 1e3).toFixed(0) + "k";
+  return "$" + abs.toFixed(0);
+}
+
+d3.csv("/assets/data/networth-quantiles-by-race-2022.csv").then(raw => {
+  const data = raw
+    .map(d => ({
+      race: RACE_LABEL[d.race.trim()] || d.race.trim(),
+      percentile: +d.percentile,
+      value: +d.results
+    }))
+    .filter(d => RACE_ORDER.includes(d.race) && Math.abs(d.percentile - 0.5) < 1e-6);
+
+  const chart = Plot.plot({
+    width: 340,
+    height: 300,
+    marginLeft: 55,
+    marginBottom: 30,
+    marginTop: 40,
+    x: {
+      domain: RACE_ORDER,
+      label: null
+    },
+    y: {
+      label: "Median net worth",
+      grid: true,
+      tickFormat: formatMoney
+    },
+    marks: [
+      Plot.barY(data, {
+        x: "race",
+        y: "value",
+        fill: d => RACE_COLORS[d.race],
+        rx: 3,
+        title: d => `${d.race}: ${formatMoney(d.value)}`,
+        tip: true
+      }),
+      Plot.text(data, {
+        x: "race",
+        y: "value",
+        text: d => formatMoney(d.value),
+        dy: -10,
+        fontSize: 12,
+        fontWeight: "bold",
+        fill: d => RACE_COLORS[d.race]
+      }),
+      Plot.ruleY([0])
+    ]
+  });
+
+  document.getElementById("chart-container").appendChild(chart);
+
+  requestAnimationFrame(() => {
+    sendHeight();
+    setTimeout(sendHeight, 300);
+    setTimeout(sendHeight, 800);
+  });
+});
+
+let _sendHeightTimer;
+function sendHeight() {
+  clearTimeout(_sendHeightTimer);
+  _sendHeightTimer = setTimeout(() => {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ iframeHeight: h }, '*');
+  }, 50);
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1500);
+const _ro = new ResizeObserver(sendHeight);
+_ro.observe(document.body);
+</script>
+</body>
+</html>

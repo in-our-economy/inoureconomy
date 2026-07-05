@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Net Worth by Percentile and Race</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #fff;
+    color: #1a1a2e;
+    padding: 1.5rem 1rem 1rem;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  .overall-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    color: #1a1a2e;
+  }
+  .overall-subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+  .controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+  .hint {
+    font-size: 0.78rem;
+    color: #777;
+    text-align: center;
+  }
+  #reset-zoom {
+    font-size: 0.78rem;
+    color: #333;
+    background: #f2f2f2;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+  }
+  #reset-zoom:hover { background: #e6e6e6; }
+  #chart-container {
+    max-width: 760px;
+    margin: 0 auto;
+    touch-action: none;
+  }
+  .legend-row {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    color: #333;
+  }
+  .legend-row span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .legend-row .swatch {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .note {
+    font-size: 0.72rem;
+    color: #888;
+    margin-top: 1rem;
+    text-align: center;
+    line-height: 1.5;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .axis text { font-size: 11px; fill: #444; }
+  .axis path, .axis line { stroke: #ccc; }
+  .grid line { stroke: #eee; }
+  .grid path { display: none; }
+  .zero-line { stroke: #999; stroke-dasharray: 2,2; }
+  .series-line { fill: none; stroke-width: 2.25px; }
+  .tooltip-box {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(255,255,255,0.97);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.76rem;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: none;
+    white-space: nowrap;
+  }
+  .tooltip-box .t-perc { font-weight: 700; margin-bottom: 0.25rem; color: #1a1a2e; }
+  .tooltip-box .t-gap { color: #555; margin-bottom: 0.35rem; padding-bottom: 0.3rem; border-bottom: 1px solid #eee; }
+  .tooltip-box .t-row { display: flex; align-items: center; gap: 0.35rem; }
+  .tooltip-box .t-swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .hover-line { stroke: #999; stroke-width: 1px; stroke-dasharray: 3,3; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="overall-title">Net Worth by Percentile and Race, 2022</div>
+<div class="overall-subtitle">2022 Survey of Consumer Finances</div>
+
+<div class="controls-row">
+  <span class="hint">Scroll or pinch to zoom &middot; drag to pan &middot; double-click to reset</span>
+  <button id="reset-zoom" type="button">Reset zoom</button>
+</div>
+
+<div id="chart-container" style="position: relative;"></div>
+
+<div class="legend-row" id="legend-row"></div>
+
+<div class="note">
+  Based on Cyrus O'Brien's analysis of Survey of Consumer Finances microdata. Net worth values are household-level, 2022 dollars.
+</div>
+
+<script>
+const RACE_COLORS = { "White": "#6B4F9E", "Black": "#4A90A4", "Latino": "#E8944A" };
+const RACE_ORDER = ["White", "Black", "Latino"];
+const RACE_LABEL = { "white": "White", "Black": "Black", "Latino": "Latino" };
+
+function formatMoney(v) {
+  const sign = v < 0 ? "-" : "";
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return sign + "$" + (abs / 1e6).toFixed(abs >= 1e7 ? 0 : 1) + "M";
+  if (abs >= 1e3) return sign + "$" + (abs / 1e3).toFixed(abs >= 1e4 ? 0 : 1) + "k";
+  return sign + "$" + abs.toFixed(0);
+}
+
+function formatGap(whiteVal, blackVal) {
+  if (whiteVal <= 0 || blackVal <= 0) return null;
+  const ratio = whiteVal / blackVal;
+  return parseFloat(ratio.toPrecision(2)) + "x";
+}
+
+d3.csv("/assets/data/networth-quantiles-by-race-2022.csv").then(raw => {
+  const data = raw.map(d => ({
+    race: RACE_LABEL[d.race.trim()] || d.race.trim(),
+    percentile: +d.percentile * 100,
+    value: +d.results
+  })).filter(d => RACE_ORDER.includes(d.race));
+
+  const byRace = {};
+  RACE_ORDER.forEach(r => {
+    byRace[r] = data.filter(d => d.race === r).sort((a, b) => a.percentile - b.percentile);
+  });
+
+  // Legend
+  const legend = d3.select("#legend-row");
+  RACE_ORDER.forEach(r => {
+    legend.append("span").html(
+      `<span class="swatch" style="background:${RACE_COLORS[r]};"></span> ${r}`
+    );
+  });
+
+  const container = document.getElementById("chart-container");
+  const margin = { top: 20, right: 24, bottom: 34, left: 64 };
+  const outerWidth = Math.max(300, Math.min(760, window.innerWidth - 32));
+  const outerHeight = 380;
+  const width = outerWidth - margin.left - margin.right;
+  const height = outerHeight - margin.top - margin.bottom;
+
+  const svg = d3.select(container).append("svg")
+    .attr("width", outerWidth)
+    .attr("height", outerHeight);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Clip path so zoomed lines don't spill outside the plot area
+  svg.append("defs").append("clipPath")
+    .attr("id", "plot-clip")
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
+  const xExtentFull = [1, 99];
+  const x = d3.scaleLinear().domain(xExtentFull).range([0, width]);
+  const y = d3.scaleLinear().range([height, 0]);
+
+  const xAxisG = g.append("g").attr("class", "axis x-axis").attr("transform", `translate(0,${height})`);
+  const yAxisG = g.append("g").attr("class", "axis y-axis");
+  const gridG = g.append("g").attr("class", "grid");
+  const zeroLine = g.append("line").attr("class", "zero-line").attr("x1", 0).attr("x2", width);
+
+  const plotArea = g.append("g").attr("clip-path", "url(#plot-clip)");
+  const linesG = plotArea.append("g");
+
+  const line = d3.line()
+    .x(d => x(d.percentile))
+    .y(d => y(d.value))
+    .curve(d3.curveMonotoneX);
+
+  function computeYDomain(xDomain) {
+    let vals = [];
+    RACE_ORDER.forEach(r => {
+      byRace[r].forEach(d => {
+        if (d.percentile >= xDomain[0] && d.percentile <= xDomain[1]) vals.push(d.value);
+      });
+    });
+    if (!vals.length) vals = [0, 1];
+    const [lo, hi] = d3.extent(vals);
+    const pad = (hi - lo) * 0.08 || 1;
+    return [lo - pad, hi + pad];
+  }
+
+  function render(xDomain) {
+    x.domain(xDomain);
+    const yDomain = computeYDomain(xDomain);
+    y.domain(yDomain);
+
+    xAxisG.call(d3.axisBottom(x).ticks(8).tickFormat(d => Math.round(d) + "th"));
+    yAxisG.call(d3.axisLeft(y).ticks(6).tickFormat(formatMoney));
+    gridG.call(d3.axisLeft(y).ticks(6).tickSize(-width).tickFormat(""));
+    gridG.select(".domain").remove();
+
+    zeroLine
+      .attr("y1", y(0))
+      .attr("y2", y(0))
+      .style("display", yDomain[0] < 0 && yDomain[1] > 0 ? null : "none");
+
+    const paths = linesG.selectAll("path.series-line").data(RACE_ORDER, d => d);
+    paths.enter().append("path")
+      .attr("class", "series-line")
+      .attr("stroke", d => RACE_COLORS[d])
+      .merge(paths)
+      .attr("d", d => line(byRace[d]));
+  }
+
+  render(xExtentFull);
+
+  // ---- Hover tooltip ----
+  const tooltip = d3.select(container).append("div").attr("class", "tooltip-box");
+  const hoverLine = plotArea.append("line").attr("class", "hover-line")
+    .attr("y1", 0).attr("y2", height).style("display", "none");
+
+  const bisect = d3.bisector(d => d.percentile).left;
+
+  function nearestPercentile(px) {
+    const target = Math.round(x.invert(px));
+    return Math.max(1, Math.min(99, target));
+  }
+
+  function handleMove(event) {
+    const [mx, my] = d3.pointer(event, g.node());
+    if (mx < 0 || mx > width || my < 0 || my > height) { hideTooltip(); return; }
+    const p = nearestPercentile(mx);
+    hoverLine.attr("x1", x(p)).attr("x2", x(p)).style("display", "block");
+
+    const closestByRace = {};
+    RACE_ORDER.forEach(r => {
+      const arr = byRace[r];
+      const idx = bisect(arr, p);
+      const d0 = arr[Math.max(0, idx - 1)];
+      const d1 = arr[Math.min(arr.length - 1, idx)];
+      closestByRace[r] = (d1 && Math.abs(d1.percentile - p) < Math.abs(p - d0.percentile)) ? d1 : d0;
+    });
+
+    let html = `<div class="t-perc">${p}th percentile</div>`;
+    const gap = formatGap(closestByRace["White"].value, closestByRace["Black"].value);
+    if (gap) html += `<div class="t-gap">White/Black Wealth Gap: <strong>${gap}</strong></div>`;
+    RACE_ORDER.forEach(r => {
+      const closest = closestByRace[r];
+      html += `<div class="t-row"><span class="t-swatch" style="background:${RACE_COLORS[r]}"></span>${r}: <strong>${formatMoney(closest.value)}</strong></div>`;
+    });
+    tooltip.style("display", "block").html(html);
+
+    const [pageX, pageY] = d3.pointer(event, container);
+    let left = pageX + 14, top = pageY - 10;
+    if (left + 170 > outerWidth) left = pageX - 170;
+    tooltip.style("left", left + "px").style("top", top + "px");
+  }
+
+  function hideTooltip() {
+    tooltip.style("display", "none");
+    hoverLine.style("display", "none");
+  }
+
+  // ---- Zoom behavior ----
+  const zoom = d3.zoom()
+    .scaleExtent([1, 50])
+    .translateExtent([[0, 0], [width, 0]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", (event) => {
+      const newX = event.transform.rescaleX(d3.scaleLinear().domain(xExtentFull).range([0, width]));
+      let d0 = newX.domain()[0], d1 = newX.domain()[1];
+      d0 = Math.max(xExtentFull[0], d0);
+      d1 = Math.min(xExtentFull[1], d1);
+      render([d0, d1]);
+      hideTooltip();
+    });
+
+  const overlay = g.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "none")
+    .attr("pointer-events", "all")
+    .style("cursor", "crosshair")
+    .call(zoom)
+    .on("mousemove", handleMove)
+    .on("mouseleave", hideTooltip)
+    .on("dblclick.zoom", null)
+    .on("dblclick", () => {
+      overlay.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+    });
+
+  document.getElementById("reset-zoom").addEventListener("click", () => {
+    overlay.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+  });
+
+  requestAnimationFrame(() => {
+    sendHeight();
+    setTimeout(sendHeight, 300);
+    setTimeout(sendHeight, 800);
+  });
+});
+
+let _sendHeightTimer;
+function sendHeight() {
+  clearTimeout(_sendHeightTimer);
+  _sendHeightTimer = setTimeout(() => {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ iframeHeight: h }, '*');
+  }, 50);
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1500);
+const _ro = new ResizeObserver(sendHeight);
+_ro.observe(document.body);
+</script>
+</body>
+</html>

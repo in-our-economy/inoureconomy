@@ -199,6 +199,7 @@
 
 .editorial-figure {
   margin: 0;
+  background: #0d0d0d;
 
   img {
     display: block;
@@ -206,6 +207,9 @@
     max-height: 580px;
     object-fit: cover;
     object-position: center 20%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 }
 
