@@ -10,7 +10,7 @@ author: "Cyrus O'Brien"
 
 ### *"The blessings in which you, this day, rejoice, are not enjoyed in common."*
 
-I had a great time skipping the semiquincentennial yesterday and instead re-reading Frederick Douglass's [What to the Slave Is the 4th of July?](https://masshumanities.org/files/programs/douglass/speech_abridged_med.pdf). Since my first reading of his 1852 speech (I think when I was in high school), it's reinforced my sense of alienation from mainstream American nationalism. This year, what strikes me is that a similar sense of alienation seems widely shared. D.C. residents are fleeing the city's July 4 celebrations; the media elite are questioning the direction of the country; and my friends, family, and neighbors are approaching the celebrations with far more national shame - and much less national pride - than in previous years.
+I had a great time skipping the semiquincentennial celebrations yesterday and instead re-reading Frederick Douglass's [What to the Slave Is the 4th of July?](https://masshumanities.org/files/programs/douglass/speech_abridged_med.pdf). This year, what strikes me is that that national mood is more closely aligned with Douglass's sentiment than anytime I remember. D.C. residents are fleeing the city's July 4 celebrations; the media elite are questioning the direction of the country; and my friends, family, and neighbors are approaching the celebrations with far more national shame - and much less national pride - than in previous years.
 
 My guess is that this section resonates more widely today than in years past:
 
