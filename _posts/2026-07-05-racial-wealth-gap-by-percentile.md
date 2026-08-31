@@ -100,7 +100,7 @@ Starting at the 50th percentile, you'll see the same results as are in the bar c
 </script>
 
 * Roughly **17% of Black households** and **8% of Latino households** have negative net worth (they owe more than they own), compared to about **6% of White households**.
-* The gap isn't just about the top of the distribution — it's present starting near the very bottom. By the 10th percentile, White households already have positive net worth (about $5,500) while the typical Black household in that range is roughly **$11,800 in debt**.
+* The gap shows up at the bottom of the distribution too. By the 10th percentile, White households already have positive net worth (about $5,500) while the typical Black household in that range is roughly **$11,800 in debt**.
 * And the gap widens as you move up. At the 90th percentile, White households have about **$2.53 million**, compared to about **$516,000** for Black households and **$519,000** for Latino households — a much bigger dollar gap than at the median.
 
 ### A different way to see the gap: same net worth, different percentile
@@ -140,11 +140,11 @@ Try hovering around $45,200 — the Black median from the bar chart above. That 
 
 Zoom in around $1 million and you'll see that 22% of white families have a net worth in excess of $1 million, compared to just 4% of Black and Latino families. 
 
-That's the real shape of the gap. It's not just that the middle of one distribution is lower than the middle of another — it's that the middle of the Black and Latino wealth distributions sits closer to the *bottom quarter* of the white wealth distribution.
+That's the real shape of the gap: the middle of the Black and Latino wealth distributions sits closer to the *bottom quarter* of the white wealth distribution than to its middle.
 
 ### Why this matters
 
-The median-only bar chart isn't wrong, but it invites a misreading: that the racial wealth gap is a single, fixed multiple — Black and Latino households have "about a sixth" of what white households have, everywhere, always. The truth is that the gap changes substantially depending on whether you're looking at poorer, average, or wealthier households. The wealthiest white families (95th percentile) have more than $4 million more than wealthy Black and Latino families. 
+The median-only bar chart isn't wrong, but it invites a misreading: that the racial wealth gap is a single, fixed multiple — Black and Latino households have "about a sixth" of what white households have, everywhere, always. In fact the gap changes substantially depending on whether you're looking at poorer, average, or wealthier households. The wealthiest white families (95th percentile) have more than $4 million more than wealthy Black and Latino families. 
 
 None of this is inevitable. It's the result of policy choices — from redlining and exclusion from federal homeownership programs to unequal access to credit and inherited wealth — that concentrated asset-building among white families for generations. The wealth gap you see in this data isn't a gap that has anything to do with intrinsic characteristics of white, Black, or Latino people. 
 

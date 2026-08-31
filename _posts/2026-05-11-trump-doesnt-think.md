@@ -39,7 +39,7 @@ In the interactive below, enter how much money you have, or you wish to have, or
 
 ## What the circles show
 
-The area of each circle is proportional to dollar amount. Your circle is the reference — everything else is scaled relative to it. Trump and the other members of the billionaire class have wealth that is beyond the scale of your imagination. Imagine spending $6,500 a day, every day. Donald Trump could do that and not run out of money until April 11, 4764. That's not a typo. That's why he doesn't think about your finances. 
+The area of each circle is proportional to dollar amount. Your circle is the reference — everything else is scaled relative to it. Trump and the other members of the billionaire class have wealth that is beyond the scale of your imagination. Imagine spending $6,500 a day, every day. Donald Trump could do that and not run out of money until April 11, 4764 — check the math yourself. That's why he doesn't think about your finances. 
 
 
 
